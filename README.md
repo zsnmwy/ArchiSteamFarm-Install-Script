@@ -9,9 +9,9 @@ wget -O ASF-install.sh https://github.com/zsnmwy/ArchiSteamFarm-Install-Script/r
 The script language is Chinese.  
 English version will coming soon. 
 
-中文教程发布在Steamcn https://steamcn.com/t378278-1-1
+中文教程发布在Steamcn https://steamcn.com/t378586-1-1
 
-## 现在支持的系统 / Now Support system
+## 现在支持的系统 / System support ever
 
 Only support for x64
 
