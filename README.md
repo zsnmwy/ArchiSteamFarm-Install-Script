@@ -7,9 +7,11 @@ Help you quickly install ASF on VPS. 帮助你快速地把ASF安装在VPS上面�
 wget -O ASF-install.sh https://github.com/zsnmwy/ArchiSteamFarm-Install-Script/releases/download/V1.0/ASF-install.sh && bash ASF-install.sh
 ```
 The script language is Chinese.  
-English version will coming soon. 
+English version will coming soon.   
+Now Wiki is available.
 
-中文教程发布在Steamcn https://steamcn.com/t378586-1-1
+![现在Wiki的V1版本的中文版已经编写完成](https://github.com/zsnmwy/ArchiSteamFarm-Install-Script/wiki)  
+更适合萌新的教程发布在Steamcn https://steamcn.com/t378586-1-1
 
 ## 现在支持的系统 / System support ever
 
