@@ -244,14 +244,18 @@ Check_system_Install_NetCore() {
 		echo -e "${Info} ${GreenBG} 若出现dotnet的版本号 为安装正常 ${Font}"
 	elif [[ "${ID}" == "raspbian" && $(echo "${VERSION_ID}") -eq 9 ]]; then
 		echo -e "${OK} ${GreenBG} 当前系统为 ${ID} ${VERSION_ID} ${Font} "
+		INS="apt-get"
+		apt-get update
+		apt-get install wget unzip curl libunwind8 gettext -y
 		Steam_information_account_Get
 		Steam_information_password_Get
-		Raspberry_Pi_Install
 	elif [[ "${ID}" == "raspbian" && $(echo "${VERSION_ID}") -eq 8 ]]; then
 		echo -e "${OK} ${GreenBG} 当前系统为 ${ID} ${VERSION_ID} ${Font} "
+		INS="apt-get"
+		apt-get update
+		apt-get install wget unzip curl libunwind8 gettext -y
 		Steam_information_account_Get
 		Steam_information_password_Get
-		Raspberry_Pi_Install
 	else
 		echo -e "${Error} ${RedBG} 当前系统为 ${ID} ${VERSION_ID} 不在支持的系统列表内，安装中断 ${Font} "
 		exit 1
@@ -264,23 +268,20 @@ Check_system_Install_NetCore() {
 
 Raspberry_Pi_Install_ArchiSteamFarm() {
 	if [[ ! -e ${ARCHISTEAMFARM_FILES_DIR} ]]; then
+		mkdir /tmp/
 		while true; do
-			apt-get update
-			apt-get install wget unzip curl libunwind8 gettext -y
-			mkdir /tmp/
 			if [[ ${qcloud_enable} == "1" ]]; then
-				wget --no-check-certificate -P /tmp/ -O ArchiSteamFarm.zip http://p2feur8d9.bkt.clouddn.com/ASF-linux-arm.zip
+				wget --no-check-certificate -O ArchiSteamFarm.zip http://p2feur8d9.bkt.clouddn.com/ASF-linux-arm.zip
 			else
-				wget --no-check-certificate -P /tmp/ -O ArchiSteamFarm.zip https://github.com/JustArchi/ArchiSteamFarm/releases/download/3.1.1.1/ASF-linux-arm.zip
+				wget --no-check-certificate -O ArchiSteamFarm.zip https://github.com/JustArchi/ArchiSteamFarm/releases/download/3.1.1.1/ASF-linux-arm.zip
 
 			fi
-			if [[ -e /tmp/ArchiSteamFarm.zip ]]; then
-				cd /tmp/
+			if [[ -e ArchiSteamFarm.zip ]]; then
 				echo -e "下载完成"
-				unzip -d ${ARCHISTEAMFARM_FILES_DIR} /tmp/ArchiSteamFarm.zip
-				rm /tmp/ArchiSteamFarm.zip
+				unzip -d ${ARCHISTEAMFARM_FILES_DIR} ArchiSteamFarm.zip
+				rm ArchiSteamFarm.zip
 				cd ${ARCHISTEAMFARM_FILES_DIR}
-				chmod 755 ./ArchiSteamFarm
+				chmod 777 ./ArchiSteamFarm
 				echo -e "\n ${Info} ArchiSteamFarm-arm 安装完成，继续..."
 				break
 			else
@@ -291,16 +292,15 @@ Raspberry_Pi_Install_ArchiSteamFarm() {
 		echo -e "\n ${Info} ArchiSteamFarm 已安装，继续..."
 	fi
 }
-
+# check ok
 Raspberry_Pi_Install_Dotnet() {
 	while true; do
 		if [[ ${qcloud_enable} == "1" ]]; then
-			wget -P /root/ http://p2feur8d9.bkt.clouddn.com/dotnet-runtime-latest-linux-arm.tar.gz
+			wget http://p2feur8d9.bkt.clouddn.com/dotnet-runtime-latest-linux-arm.tar.gz
 		else
-			wget --no-check-certificate -P /root/ https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-linux-arm.tar.gz
+			wget --no-check-certificate https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-linux-arm.tar.gz
 		fi
-		if [[ -e /root/dotnet-runtime-latest-linux-arm.tar.gz ]]; then
-			cd /root
+		if [[ -e dotnet-runtime-latest-linux-arm.tar.gz ]]; then
 			mkdir -p /opt/dotnet
 			tar zxf dotnet-runtime-latest-linux-arm.tar.gz -C /opt/dotnet
 			ln -s /opt/dotnet/dotnet /usr/local/bin
@@ -786,17 +786,28 @@ Remove_all_file() {
 	rm /etc/cron.hourly/Add_cron_update_hosts_steamcommunity.sh
 	rm -r ${ARCHISTEAMFARM_FILES_DIR}
 	rm -r /opt/Manage_ArchiSteamFarm
+	if [[ "${ID}" == "raspbian" ]] ;then
+		rm -r /opt/dotnet
+	fi
 }
 
 Raspberry_Pi_Install() {
-	Raspberry_Pi_Install_Dotnet
+	Is_root
+	Check_system_bit
+	Check_install_ArchiSteamFarm
+	Qcloud_source
 	Raspberry_Pi_Install_ArchiSteamFarm
+	Raspberry_Pi_Install_Dotnet
 	Install_nvm_node_V8.11.1_PM2
 	Add_hosts_steamcommunity
-	Steam_information_account_Get
-	Steam_information_password_Get
 	Bot_Add
-	ArchiSteamFarm_json_English_change_to_zh-CN
+	Add_start_script_pm2_bash
+	Add_cron_update_hosts_steamcommunity
+	Add_hosts_steamcommunity
+	Remove_hosts_log_week
+	Choose_language
+	Source_bash
+	Check_ArchiSteamFarm_install_succeed
 }
 
 General_install() {
@@ -908,7 +919,12 @@ https://github.com/zsnmwy/ArchiSteamFarm-Install-Script
 
 	case $aNumber in
 	1)
-		General_install
+		if [[ "${ID}" == "raspbian" ]];then
+			echo -e "${Info} ${GreenBG} rapbian install start ${Font}"
+			Raspberry_Pi_Install
+		else
+			General_install
+		fi
 		;;
 	2)
 		Manage_ArchiSteamFarm_Panel
