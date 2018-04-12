@@ -9,7 +9,7 @@ Help you quickly install ASF on VPS. 帮助你快速地把ASF安装在VPS上面�
 wget -O ASF-install.sh https://github.com/zsnmwy/ArchiSteamFarm-Install-Script/releases/download/V1.0/ASF-install.sh && bash ASF-install.sh
 ```
 如果上面的命令出现错误，如:  
-If this command get some errors,like this:
+If this command get some errors,like this: 
 ```
 ERROR: The certificate of 'github.com' is not trusted.
 ERROR: The certificate of 'github.com' hasn't got a known issuer.
@@ -27,6 +27,7 @@ NOTE: This opens you up to man-in-the-middle (MitM) attacks
 The script language is Chinese.  
 English version will coming soon.   
 Now Wiki(zh-CN) is available.
+
 
 ![现在Wiki的V1版本的中文版已经编写完成](https://github.com/zsnmwy/ArchiSteamFarm-Install-Script/wiki)  
 
