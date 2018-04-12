@@ -421,7 +421,7 @@ Remove_hosts_log_week() {
 		if [[ ${qcloud_enable} == "1" ]]; then
 			wget http://p2feur8d9.bkt.clouddn.com/Remove_hosts_log_week.sh
 		else
-			wget --no-check-certificate wget --no-check-certificate https://github.com/zsnmwy/Temporary-storage/releases/download/V0.5/Remove_hosts_log_week.sh
+			wget --no-check-certificate https://github.com/zsnmwy/Temporary-storage/releases/download/V0.5/Remove_hosts_log_week.sh
 		fi
 		if [[ -e Remove_hosts_log_week.sh ]]; then
 			chmod 777 Remove_hosts_log_week.sh
