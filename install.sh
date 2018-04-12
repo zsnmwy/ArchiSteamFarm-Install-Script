@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
-
+#Author:zsnmwy
+#Github-repo:ArchiSteamFarm-Install-Script
 #support system :
 #Tencent Debian 8.2(OK) /Debian 9(OK) /centos 7.0(OK) / Ubuntu server 14.04.1 LTS 64bit(OK) / Ubuntu 16.04.1 LTS (OK)
 #Vultr Debian9(OK)/ Debian 8（OK） / centos 7(OK) /Ubuntu 14.04 x64（OK） /Ubuntu 16.04.3 LTS(OK)/Ubuntu 17.10 x64(OK)
 #兼容SSR centos7 doub脚本
+
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin:/opt/ArchiSteamFarm:/opt/Manage_ArchiSteamFarm:/root/.nvm/versions/node/v8.11.1/bin
 export PATH
+
 # fonts color
 Green="\033[32m"
 Red="\033[31m"
@@ -13,19 +16,24 @@ Yellow="\033[33m"
 GreenBG="\033[42;37m"
 RedBG="\033[41;37m"
 Font="\033[0m"
-Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
+Green_font_prefix="\033[32m"
+Red_font_prefix="\033[31m"
+Green_background_prefix="\033[42;37m"
+Red_background_prefix="\033[41;37m"
+Font_color_suffix="\033[0m"
 
 # notification information
 Info="${Green}[信息]${Font}"
 OK="${Green}[OK]${Font}"
 Error="${Red}[错误]${Font}"
 
+# files/floder path
+jq_file="/usr/bin/jq"
+ArchiSteamFarm_files="/opt/ArchiSteamFarm"
+
 source /etc/os-release
 VERSION=$(echo ${VERSION} | awk -F "[()]" '{print $2}')
 bit=$(uname -m)
-
-jq_file="/usr/bin/jq"
-ArchiSteamFarm_files="/opt/ArchiSteamFarm"
 
 Centos_Disable_Firewalld_Enable_Iptables() {
 	echo -e "${Info} ${GreenBG} 尝试停止Firewalld ${Font}"
@@ -202,12 +210,12 @@ Check_system_Install_NetCore() {
 		Steam_information_account_Get
 		Steam_information_password_Get
 		INS="apt-get"
-		apt-get update 
+		apt-get update
 		apt-get install curl wget unzip screen -y
 		curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-xenial-prod xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
-		apt-get update 
+		apt-get update
 		apt-get install dotnet-sdk-2.1.4 -y
 		dotnet --version
 		echo -e "${Info} ${GreenBG} 若出现dotnet的版本号 为安装正常 ${Font}"
@@ -222,7 +230,7 @@ Check_system_Install_NetCore() {
 		Steam_information_account_Get
 		Steam_information_password_Get
 		INS="apt-get"
-		apt-get update 
+		apt-get update
 		apt-get install curl wget unzip screen -y
 		curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
