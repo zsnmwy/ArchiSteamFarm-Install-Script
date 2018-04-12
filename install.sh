@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 #Author:zsnmwy
-#Github-repo:ArchiSteamFarm-Install-Script
+#ArchiSteamFarm-Install-Script
+#Help you quickly install ASF on VPS.
+#帮助你快速地把ASF安装在VPS上面。
+
 #support system :
 #Tencent Debian 8.2(OK) /Debian 9(OK) /centos 7.0(OK) / Ubuntu server 14.04.1 LTS 64bit(OK) / Ubuntu 16.04.1 LTS (OK)
 #Vultr Debian9(OK)/ Debian 8（OK） / centos 7(OK) /Ubuntu 14.04 x64（OK） /Ubuntu 16.04.3 LTS(OK)/Ubuntu 17.10 x64(OK)
@@ -28,12 +31,12 @@ OK="${Green}[OK]${Font}"
 Error="${Red}[错误]${Font}"
 
 # files/floder path
-jq_file="/usr/bin/jq"
-ArchiSteamFarm_files="/opt/ArchiSteamFarm"
+JQ_FILE_DIR="/usr/bin/jq"
+ARCHISTEAMFARM_FILES_DIR="/opt/ArchiSteamFarm"
 
 source /etc/os-release
 VERSION=$(echo ${VERSION} | awk -F "[()]" '{print $2}')
-bit=$(uname -m)
+BIT=$(uname -m)
 
 Centos_Disable_Firewalld_Enable_Iptables() {
 	echo -e "${Info} ${GreenBG} 尝试停止Firewalld ${Font}"
@@ -77,11 +80,11 @@ EOF
 }
 
 Check_system_bit() {
-	if [[ ${bit} == 'x86_64' ]]; then
+	if [[ ${BIT} == 'x86_64' ]]; then
 		echo -e "${OK} ${GreenBG} 符合脚本的系统位数要求 64位 ${Font}"
-	elif [[ ${bit} == 'armv7l' ]]; then
+	elif [[ ${BIT} == 'armv7l' ]]; then
 		echo -e "${Info} ${GreenBG} 检测处理器为32位 可能是官方不更新系统导致的  请确保处理器为64位${Font}"
-	elif [[ ${bit} == 'armv8' ]]; then
+	elif [[ ${BIT} == 'armv8' ]]; then
 		echo -e "${OK} ${GreenBG} 符合脚本的系统位数要求 64位 ${Font}"
 	else
 		echo -e "${Error} ${RedBG} 请更换为Linux64位系统 推荐Ubuntu 16.04 ${Font}"
@@ -90,7 +93,7 @@ Check_system_bit() {
 }
 
 Check_install_ArchiSteamFarm() {
-	if [[ -e ${ArchiSteamFarm_files} ]]; then
+	if [[ -e ${ARCHISTEAMFARM_FILES_DIR} ]]; then
 		echo -e "${Info} ${GreenBG} 已经安装ArchiSteamFarm ${Font} \n ${Info} ${RedBG} 如需重装 请先到管理面板进行选择移除ArchiSteamFarm ${Font}"
 		exit 0
 	else
@@ -260,10 +263,10 @@ Check_system_Install_NetCore() {
 #Note: Pi Zero is not supported because the .NET Core JIT depends on armv7 instructions not available on Pi Zero.
 
 Raspberry_Pi_Install_ArchiSteamFarm() {
-	if [[ ! -e ${ArchiSteamFarm_files} ]]; then
+	if [[ ! -e ${ARCHISTEAMFARM_FILES_DIR} ]]; then
 		while true; do
 			apt-get update
-			apt-get install wget unzip -y
+			apt-get install wget unzip curl libunwind8 gettext -y
 			mkdir /tmp/
 			if [[ ${qcloud_enable} == "1" ]]; then
 				wget --no-check-certificate -P /tmp/ -O ArchiSteamFarm.zip http://p2feur8d9.bkt.clouddn.com/ASF-linux-arm.zip
@@ -271,12 +274,12 @@ Raspberry_Pi_Install_ArchiSteamFarm() {
 				wget --no-check-certificate -P /tmp/ -O ArchiSteamFarm.zip https://github.com/JustArchi/ArchiSteamFarm/releases/download/3.1.1.1/ASF-linux-arm.zip
 
 			fi
-			if [[ -e /root/ArchiSteamFarm.zip ]]; then
+			if [[ -e /tmp/ArchiSteamFarm.zip ]]; then
 				cd /tmp/
 				echo -e "下载完成"
-				unzip -d ${ArchiSteamFarm_files} /tmp/ArchiSteamFarm.zip
+				unzip -d ${ARCHISTEAMFARM_FILES_DIR} /tmp/ArchiSteamFarm.zip
 				rm /tmp/ArchiSteamFarm.zip
-				cd ${ArchiSteamFarm_files}
+				cd ${ARCHISTEAMFARM_FILES_DIR}
 				chmod 755 ./ArchiSteamFarm
 				echo -e "\n ${Info} ArchiSteamFarm-arm 安装完成，继续..."
 				break
@@ -291,14 +294,19 @@ Raspberry_Pi_Install_ArchiSteamFarm() {
 
 Raspberry_Pi_Install_Dotnet() {
 	while true; do
-		wget --no-check-certificate -P /root/ https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-linux-arm.tar.gz
+		if [[ ${qcloud_enable} == "1" ]]; then
+			wget -P /root/ http://p2feur8d9.bkt.clouddn.com/dotnet-runtime-latest-linux-arm.tar.gz
+		else
+			wget --no-check-certificate -P /root/ https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-linux-arm.tar.gz
+		fi
 		if [[ -e /root/dotnet-runtime-latest-linux-arm.tar.gz ]]; then
 			cd /root
 			mkdir -p /opt/dotnet
 			tar zxf dotnet-runtime-latest-linux-arm.tar.gz -C /opt/dotnet
 			ln -s /opt/dotnet/dotnet /usr/local/bin
 			rm dotnet-runtime-latest-linux-arm.tar.gz
-			echo -e "安装dotnet 完成"
+			echo -e "${OK} ${GreenBG} 安装dotnet 完成 ${Font}"
+			export PATH=$PATH:/opt/dotnet
 			break
 		else
 			echo -e "\n dotnet下载失败 重新下载"
@@ -336,9 +344,9 @@ Install_nvm_node_V8.11.1_PM2() {
 }
 
 JQ_install() {
-	if [[ ! -e ${jq_file} ]]; then
+	if [[ ! -e ${JQ_FILE_DIR} ]]; then
 		while true; do
-			if [[ ${bit} == "x86_64" ]]; then
+			if [[ ${BIT} == "x86_64" ]]; then
 				cd /root/
 				if [[ ${qcloud_enable} == "1" ]]; then
 					wget --no-check-certificate -P /root/ -O jq http://p2feur8d9.bkt.clouddn.com/jq-linux64
@@ -437,7 +445,7 @@ ArchiSteamFarm_Install() {
 
 		if [[ -e /root/ArchiSteamFarm.zip ]]; then
 			echo -e "${Info} ${GreenBG} 下载完成 开始解压 ${Font}"
-			unzip -o -d ${ArchiSteamFarm_files} /root/ArchiSteamFarm.zip
+			unzip -o -d ${ARCHISTEAMFARM_FILES_DIR} /root/ArchiSteamFarm.zip
 			echo -e "${OK} ${GreenBG} 解压完成 ${Font}"
 			rm /root/ArchiSteamFarm.zip
 			break
@@ -482,8 +490,8 @@ ${Green_font_prefix}3.${Font_color_suffix}English 英语
 
 # 设置ArchiSteamFarm为简体中文
 ArchiSteamFarm_json_English_change_to_zh-CN() {
-	cd ${ArchiSteamFarm_files}/config
-	cat >${ArchiSteamFarm_files}/config/ASF.json <<EOF
+	cd ${ARCHISTEAMFARM_FILES_DIR}/config
+	cat >${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json <<EOF
 {
 	"AutoRestart": true,
 	"BackgroundGCPeriod": 0,
@@ -517,8 +525,8 @@ EOF
 
 # 设置ArchiSteamFarm为繁体中文
 ArchiSteamFarm_json_English_change_to_zh-TW() {
-	cd ${ArchiSteamFarm_files}/config
-	cat >${ArchiSteamFarm_files}/config/ASF.json <<EOF
+	cd ${ARCHISTEAMFARM_FILES_DIR}/config
+	cat >${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json <<EOF
 {
 	"AutoRestart": true,
 	"BackgroundGCPeriod": 0,
@@ -586,16 +594,16 @@ Steam_information_password_Get() {
 # 添加一个机器人/BOT 配置文件名为账户名
 Bot_Add() {
 	echo -e "${Info} ${GreenBG} 准备添加BOT ${Font}"
-	touch ${ArchiSteamFarm_files}/config/${Steam_account_second}.json
-	cat >${ArchiSteamFarm_files}/config/${Steam_account_second}.json <<EOF
+	touch ${ARCHISTEAMFARM_FILES_DIR}/config/${Steam_account_second}.json
+	cat >${ARCHISTEAMFARM_FILES_DIR}/config/${Steam_account_second}.json <<EOF
 {
   "SteamLogin": "Steam_account_account_second",
   "SteamPassword": "Steam_account_password_second",
   "Enabled": true
 }
 EOF
-	sed -i 's/Steam_account_account_second/'"$(echo ${Steam_account_second})"'/' ${ArchiSteamFarm_files}/config/${Steam_account_second}.json
-	sed -i 's/Steam_account_password_second/'"$(echo ${Steam_account_password_second})"'/' ${ArchiSteamFarm_files}/config/${Steam_account_second}.json
+	sed -i 's/Steam_account_account_second/'"$(echo ${Steam_account_second})"'/' ${ARCHISTEAMFARM_FILES_DIR}/config/${Steam_account_second}.json
+	sed -i 's/Steam_account_password_second/'"$(echo ${Steam_account_password_second})"'/' ${ARCHISTEAMFARM_FILES_DIR}/config/${Steam_account_second}.json
 	echo -e "${OK} ${GreenBG} 添加BOT完成 ${Font}"
 }
 
@@ -643,11 +651,11 @@ Manage_ArchiSteamFarm_normal_start_app() {
 		elif [[" $ArchiSteamFarm_status" == "errored" ]]; then
 			echo -e "${Error} ${RedBG} 检测到ArchiSteamFarm出现错误 ${Font}\n ${Info} ${RedBG} 尝试从PM2中移除ArchiSteamFarm 然后以常规方式启动ArchiSteamFarm ${Font}"
 			Manage_ArchiSteamFarm_delete_app
-			cd ${ArchiSteamFarm_files}
+			cd ${ARCHISTEAMFARM_FILES_DIR}
 			dotnet ArchiSteamFarm.dll
 		fi
 	else
-		cd ${ArchiSteamFarm_files}
+		cd ${ARCHISTEAMFARM_FILES_DIR}
 		dotnet ArchiSteamFarm.dll
 	fi
 }
@@ -723,7 +731,7 @@ Check_ArchiSteamFarm_install_succeed() {
 	echo -e "${Info} ${RedBG} pm2的版本为 ${Font}   ${pm2_version}"
 	echo -e "${Info} ${RedBG} nvm的版本为 ${Font}   ${nvm_version}"
 	echo -e "${Info} ${RedBG} node的版本为 ${Font}  ${node_version}"
-	if [[ -e ${ArchiSteamFarm_files} ]]; then
+	if [[ -e ${ARCHISTEAMFARM_FILES_DIR} ]]; then
 		echo -e "${OK} ${GreenBG} ArchiSteamFarm文件夹已找到 ${Font}"
 	else
 		echo -e "${Error} ${RedBG} ArchiSteamFarm文件夹没有找到 请查看日志 检查网络是否异常"
@@ -747,7 +755,7 @@ Check_ArchiSteamFarm_install_succeed() {
 }
 
 menu_status_ArchiSteamFarm() {
-	if [[ -e ${ArchiSteamFarm_files} ]]; then
+	if [[ -e ${ARCHISTEAMFARM_FILES_DIR} ]]; then
 		ArchiSteamFarm_get_id_pm2=$(pm2 ls | grep ArchiSteamFarm)
 		if [[ -n ${ArchiSteamFarm_get_id_pm2} ]]; then
 			ArchiSteamFarm_status=$(pm2 show ArchiSteamFarm | grep status | awk -F ' ' '{print $4}')
@@ -776,7 +784,7 @@ Source_bash() {
 Remove_all_file() {
 	rm /etc/cron.weekly/Remove_hosts_log_week.sh
 	rm /etc/cron.hourly/Add_cron_update_hosts_steamcommunity.sh
-	rm -r ${ArchiSteamFarm_files}
+	rm -r ${ARCHISTEAMFARM_FILES_DIR}
 	rm -r /opt/Manage_ArchiSteamFarm
 }
 
