@@ -118,7 +118,7 @@ Check_system_Install_NetCore() {
 		sh -c 'echo -e "[packages-microsoft-com-prod]\nname=packages-microsoft-com-prod \nbaseurl=https://packages.microsoft.com/yumrepos/microsoft-rhel7.3-prod\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/dotnetdev.repo'
 		yum update -y
 		yum install -y unzip curl libunwind libicu wget unzip screen
-		yum install -y dotnet-sdk-2.1.104
+		yum install -y dotnet-sdk-2.0.0
 		export PATH=$PATH:$HOME/dotnet
 		dotnet --version
 		echo -e "${Info} ${GreenBG} 若出现dotnet的版本号 为安装正常 ${Font}"
@@ -139,7 +139,7 @@ Check_system_Install_NetCore() {
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-jessie-prod jessie main" > /etc/apt/sources.list.d/dotnetdev.list'
 		apt-get update
-		apt-get install dotnet-sdk-2.1.104 -y
+		apt-get install dotnet-sdk-2.0.0 -y
 		export PATH=$PATH:$HOME/dotnet
 		dotnet --version
 		echo -e "${Info} ${GreenBG} 若出现dotnet的版本号 为安装正常 ${Font}"
@@ -160,7 +160,7 @@ Check_system_Install_NetCore() {
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/dotnetdev.list'
 		apt-get update
-		apt-get install dotnet-sdk-2.1.104 -y
+		apt-get install dotnet-sdk-2.0.0 -y
 		export PATH=$PATH:$HOME/dotnet
 		dotnet --version
 		echo -e "${Info} ${GreenBG} 若出现dotnet的版本号 为安装正常 ${Font}"
@@ -180,7 +180,7 @@ Check_system_Install_NetCore() {
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-artful-prod artful main" > /etc/apt/sources.list.d/dotnetdev.list'
 		apt-get update
-		apt-get install dotnet-sdk-2.1.104 -y
+		apt-get install dotnet-sdk-2.1.4 -y
 		dotnet --version
 		echo -e "${Info} ${GreenBG} 若出现dotnet的版本号 为安装正常 ${Font}"
 	elif [[ "${ID}" == "ubuntu" && $(echo "${VERSION_ID}") == "17.04" ]]; then
@@ -200,7 +200,7 @@ Check_system_Install_NetCore() {
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-zesty-prod zesty main" > /etc/apt/sources.list.d/dotnetdev.list'
 		apt-get update
-		apt-get install dotnet-sdk-2.1.104 -y
+		apt-get install dotnet-sdk-2.1.4 -y
 		dotnet --version
 		echo -e "${Info} ${GreenBG} 若出现dotnet的版本号 为安装正常 ${Font}"
 	elif [[ "${ID}" == "ubuntu" && $(echo "${VERSION_ID}" | cut -d '.' -f1) -eq 16 ]]; then
@@ -219,7 +219,7 @@ Check_system_Install_NetCore() {
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-xenial-prod xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
 		apt-get update
-		apt-get install dotnet-sdk-2.1.104 -y
+		apt-get install dotnet-sdk-2.1.4 -y
 		dotnet --version
 		echo -e "${Info} ${GreenBG} 若出现dotnet的版本号 为安装正常 ${Font}"
 	elif [[ "${ID}" == "ubuntu" && $(echo "${VERSION_ID}" | cut -d '.' -f1) -eq 14 ]]; then
@@ -239,7 +239,7 @@ Check_system_Install_NetCore() {
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-trusty-prod trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
 		apt-get update
-		apt-get install dotnet-sdk-2.1.104 -y
+		apt-get install dotnet-sdk-2.1.4 -y
 		dotnet --version
 		echo -e "${Info} ${GreenBG} 若出现dotnet的版本号 为安装正常 ${Font}"
 	elif [[ "${ID}" == "raspbian" && $(echo "${VERSION_ID}") -eq 9 ]]; then
