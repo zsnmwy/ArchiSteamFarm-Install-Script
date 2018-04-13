@@ -372,7 +372,7 @@ JQ_install() {
 }
 
 Get_steamcommunity_ip() {
-	curl 'https://cloudflare-dns.com/dns-query?ct=application/dns-json&name=steamcommunity.com&type=A' | jq -r '.Answer[0].data'
+	curl 'https://cloudflare-dns.com/dns-query?ct=application/dns-json&name=steamcommunity.com&type=A' | cut -d '"' -f34
 }
 
 Add_hosts_steamcommunity() {
