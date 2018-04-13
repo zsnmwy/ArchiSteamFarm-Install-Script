@@ -3,7 +3,7 @@
 #ArchiSteamFarm-Install-Script
 #Help you quickly install ASF on VPS.
 #帮助你快速地把ASF安装在VPS上面。
-
+#VERSION v1.0.1
 #support system :
 #Tencent Debian 8.2(OK) /Debian 9(OK) /centos 7.0(OK) / Ubuntu server 14.04.1 LTS 64bit(OK) / Ubuntu 16.04.1 LTS (OK)
 #Vultr Debian9(OK)/ Debian 8（OK） / centos 7(OK) /Ubuntu 14.04 x64（OK） /Ubuntu 16.04.3 LTS(OK)/Ubuntu 17.10 x64(OK)
@@ -175,7 +175,7 @@ Check_system_Install_NetCore() {
 		Steam_information_password_Get
 		INS="apt-get"
 		apt-get update
-		apt-get install curl wget unzip screen -y
+		apt-get install curl wget unzip screen apt-transport-https -y
 		curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-artful-prod artful main" > /etc/apt/sources.list.d/dotnetdev.list'
@@ -195,7 +195,7 @@ Check_system_Install_NetCore() {
 		Steam_information_password_Get
 		INS="apt-get"
 		apt-get update
-		apt-get install curl wget unzip screen -y
+		apt-get install curl wget unzip screen apt-transport-https -y
 		curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-zesty-prod zesty main" > /etc/apt/sources.list.d/dotnetdev.list'
@@ -214,7 +214,7 @@ Check_system_Install_NetCore() {
 		Steam_information_password_Get
 		INS="apt-get"
 		apt-get update
-		apt-get install curl wget unzip screen -y
+		apt-get install curl wget unzip screen apt-transport-https -y
 		curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-xenial-prod xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
@@ -234,7 +234,7 @@ Check_system_Install_NetCore() {
 		Steam_information_password_Get
 		INS="apt-get"
 		apt-get update
-		apt-get install curl wget unzip screen -y
+		apt-get install curl wget unzip screen apt-transport-https -y
 		curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-trusty-prod trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
