@@ -244,18 +244,18 @@ Check_system_Install_NetCore() {
 		echo -e "${Info} ${GreenBG} 若出现dotnet的版本号 为安装正常 ${Font}"
 	elif [[ "${ID}" == "raspbian" && $(echo "${VERSION_ID}") -eq 9 ]]; then
 		echo -e "${OK} ${GreenBG} 当前系统为 ${ID} ${VERSION_ID} ${Font} "
-		INS="apt-get"
-		apt-get update
-		apt-get install wget unzip curl libunwind8 gettext -y
 		Steam_information_account_Get
 		Steam_information_password_Get
+		INS="apt-get"
+		apt-get update
+		apt-get install wget unzip curl libunwind8 gettext screen -y
 	elif [[ "${ID}" == "raspbian" && $(echo "${VERSION_ID}") -eq 8 ]]; then
 		echo -e "${OK} ${GreenBG} 当前系统为 ${ID} ${VERSION_ID} ${Font} "
-		INS="apt-get"
-		apt-get update
-		apt-get install wget unzip curl libunwind8 gettext -y
 		Steam_information_account_Get
 		Steam_information_password_Get
+		INS="apt-get"
+		apt-get update
+		apt-get install wget unzip curl libunwind8 gettext screen -y
 	else
 		echo -e "${Error} ${RedBG} 当前系统为 ${ID} ${VERSION_ID} 不在支持的系统列表内，安装中断 ${Font} "
 		exit 1
@@ -268,7 +268,6 @@ Check_system_Install_NetCore() {
 
 Raspberry_Pi_Install_ArchiSteamFarm() {
 	if [[ ! -e ${ARCHISTEAMFARM_FILES_DIR} ]]; then
-		mkdir /tmp/
 		while true; do
 			if [[ ${qcloud_enable} == "1" ]]; then
 				wget --no-check-certificate -O ArchiSteamFarm.zip http://p2feur8d9.bkt.clouddn.com/ASF-linux-arm.zip
@@ -372,7 +371,7 @@ JQ_install() {
 }
 
 Get_steamcommunity_ip() {
-	curl 'https://cloudflare-dns.com/dns-query?ct=application/dns-json&name=steamcommunity.com&type=A' | jq -r '.Answer[0].data'
+	curl 'https://cloudflare-dns.com/dns-query?ct=application/dns-json&name=steamcommunity.com&type=A' | cut -d '"' -f34
 }
 
 Add_hosts_steamcommunity() {
@@ -622,22 +621,22 @@ EOF
 	cd /root
 }
 
-Add_start_pm2_yaml() {
+Add_start_script_pm2_bash_PI() {
 	mkdir -p /opt/Manage_ArchiSteamFarm
-	touch /opt/Manage_ArchiSteamFarm/ArchiSteamFarm.yaml
-	cat >/opt/Manage_ArchiSteamFarm/ArchiSteamFarm.yaml <<EOF
-apps:
-  - script   : "ArchiSteamFarm.sh"
-    name     : "ArchiSteamFarm"
-    instances: 2
-    exec_mode: fork
-    cwd      : "/opt/Manage_ArchiSteamFarm"
-    watch    : false
-    interpreter: "/bin/bash"
-    env      :
-      NODE_ENV: /opt/ArchiSteamFarm:/opt/ArchiSteamFarm:/usr/bin
+	touch /opt/Manage_ArchiSteamFarm/ArchiSteamFarm.sh
+	cd /opt/Manage_ArchiSteamFarm
+	chmod 777 ArchiSteamFarm.sh
+	cat >/opt/Manage_ArchiSteamFarm/ArchiSteamFarm.sh <<EOF
+#!/usr/bin/env bash
+PATH=/opt/ArchiSteamFarm:/usr/bin
+export PATH
+cd /opt/ArchiSteamFarm
+./ArchiSteamFarm
 EOF
+	cd /root
 }
+
+
 
 Manage_ArchiSteamFarm_normal_start_app() {
 	ArchiSteamFarm_get_id_pm2=$(pm2 ls | grep ArchiSteamFarm)
@@ -721,12 +720,16 @@ Check_ArchiSteamFarm_App_online() {
 }
 
 Check_ArchiSteamFarm_install_succeed() {
-	dotnet_version=$(dotnet --version)
+	if [[ "${ID}" == "raspbian" ]]; then
+		dotnet_version=$(dotnet --info |grep Version |cut -d ':' -f2)
+	else
+		dotnet_version=$(dotnet --version)
+	fi
 	pm2_version=$(pm2 -v)
 	nvm_version=$(nvm --version)
 	node_version=$(node -v)
 	echo -e "\n\n${Info} ${GreenBG} 最后进行安装完整性确认 ${Font} \n"
-	echo -e "${Info} ${RedBG} 若出现的版本号不是类似于 2.0.0   V8.11.1   请检查日志 ${Font}"
+	echo -e "${Info} ${RedBG} 若出现的版本号不是类似于 2.0.0   V8.11.1  2.1.0-preview3-26413-05 请检查日志 ${Font}"
 	echo -e "${Info} ${RedBG} dotnet的版本为 ${Font} ${dotnet_version}"
 	echo -e "${Info} ${RedBG} pm2的版本为 ${Font}   ${pm2_version}"
 	echo -e "${Info} ${RedBG} nvm的版本为 ${Font}   ${nvm_version}"
@@ -796,12 +799,13 @@ Raspberry_Pi_Install() {
 	Check_system_bit
 	Check_install_ArchiSteamFarm
 	Qcloud_source
+	Check_system_Install_NetCore
 	Raspberry_Pi_Install_ArchiSteamFarm
 	Raspberry_Pi_Install_Dotnet
 	Install_nvm_node_V8.11.1_PM2
 	Add_hosts_steamcommunity
 	Bot_Add
-	Add_start_script_pm2_bash
+	Add_start_script_pm2_bash_PI
 	Add_cron_update_hosts_steamcommunity
 	Add_hosts_steamcommunity
 	Remove_hosts_log_week
