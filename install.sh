@@ -272,8 +272,7 @@ Raspberry_Pi_Install_ArchiSteamFarm() {
 			if [[ ${qcloud_enable} == "1" ]]; then
 				wget --no-check-certificate -O ArchiSteamFarm.zip http://p2feur8d9.bkt.clouddn.com/ASF-linux-arm.zip
 			else
-				wget --no-check-certificate -O ArchiSteamFarm.zip https://github.com/JustArchi/ArchiSteamFarm/releases/download/3.1.1.1/ASF-linux-arm.zip
-
+				wget --no-check-certificate -O ArchiSteamFarm.zip $(curl -s 'https://api.github.com/repos/JustArchi/ArchiSteamFarm/releases/latest' | grep -Po '"browser_download_url": "\K.*?(?=")' | grep linux-arm)
 			fi
 			if [[ -e ArchiSteamFarm.zip ]]; then
 				echo -e "下载完成"
@@ -401,7 +400,7 @@ Add_cron_update_hosts_steamcommunity() {
 		if [[ ${qcloud_enable} == "1" ]]; then
 			wget http://p2feur8d9.bkt.clouddn.com/Add_cron_update_hosts_steamcommunity.sh
 		else
-			wget --no-check-certificate https://github.com/zsnmwy/Temporary-storage/releases/download/V0.5/Add_cron_update_hosts_steamcommunity.sh
+			wget --no-check-certificate $(curl -s 'https://api.github.com/repos/zsnmwy/Temporary-storage/releases/latest' | grep -Po '"browser_download_url": "\K.*?(?=")' | grep Add_cron_update_hosts_steamcommunity.sh)
 		fi
 		if [[ -e Add_cron_update_hosts_steamcommunity.sh ]]; then
 			chmod 777 Add_cron_update_hosts_steamcommunity.sh
@@ -420,7 +419,7 @@ Remove_hosts_log_week() {
 		if [[ ${qcloud_enable} == "1" ]]; then
 			wget http://p2feur8d9.bkt.clouddn.com/Remove_hosts_log_week.sh
 		else
-			wget --no-check-certificate https://github.com/zsnmwy/Temporary-storage/releases/download/V0.5/Remove_hosts_log_week.sh
+			wget --no-check-certificate $(curl -s 'https://api.github.com/repos/zsnmwy/Temporary-storage/releases/latest' | grep -Po '"browser_download_url": "\K.*?(?=")' | grep Remove_hosts_log_week.sh)
 		fi
 		if [[ -e Remove_hosts_log_week.sh ]]; then
 			chmod 777 Remove_hosts_log_week.sh
@@ -439,7 +438,7 @@ ArchiSteamFarm_Install() {
 		if [[ ${qcloud_enable} == "1" ]]; then
 			wget --no-check-certificate -P /root/ -O ArchiSteamFarm.zip http://p2feur8d9.bkt.clouddn.com/ASF-generic.zip
 		else
-			wget --no-check-certificate -P /root/ -O ArchiSteamFarm.zip $(curl -s https://api.github.com/repos/JustArchi/ArchiSteamFarm/releases/latest | jq -r '.assets[0].browser_download_url')
+			wget --no-check-certificate -P /root/ -O ArchiSteamFarm.zip $(curl -s 'https://api.github.com/repos/JustArchi/ArchiSteamFarm/releases/latest' | grep -Po '"browser_download_url": "\K.*?(?=")' | grep generic)
 		fi
 
 		if [[ -e /root/ArchiSteamFarm.zip ]]; then
@@ -803,7 +802,6 @@ Raspberry_Pi_Install() {
 	Raspberry_Pi_Install_ArchiSteamFarm
 	Raspberry_Pi_Install_Dotnet
 	Install_nvm_node_V8.11.1_PM2
-	Add_hosts_steamcommunity
 	Bot_Add
 	Add_start_script_pm2_bash_PI
 	Add_cron_update_hosts_steamcommunity
@@ -819,14 +817,10 @@ General_install() {
 	Check_system_bit
 	Check_install_ArchiSteamFarm
 	Qcloud_source
-	#Github_hosts
-	#Nrm_source
 	Check_system_Install_NetCore
 	Install_nvm_node_V8.11.1_PM2
-	JQ_install
 	ArchiSteamFarm_Install
 	Bot_Add
-	#Add_start_pm2_yaml
 	Add_start_script_pm2_bash
 	Add_cron_update_hosts_steamcommunity
 	Add_hosts_steamcommunity
