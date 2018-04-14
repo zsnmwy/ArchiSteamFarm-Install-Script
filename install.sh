@@ -505,7 +505,7 @@ ArchiSteamFarm_json_English_change_to_zh-CN() {
 	"InventoryLimiterDelay": 3,
 	"IPCPassword": null,
 	"IPCPrefixes": [
-		"http://127.0.0.1:1242/"
+		"http://127.0.0.1:1242"
 	],
 	"LoginLimiterDelay": 10,
 	"MaxFarmingTime": 10,
@@ -540,7 +540,7 @@ ArchiSteamFarm_json_English_change_to_zh-TW() {
 	"InventoryLimiterDelay": 3,
 	"IPCPassword": null,
 	"IPCPrefixes": [
-		"http://127.0.0.1:1242/"
+		"http://127.0.0.1:1242"
 	],
 	"LoginLimiterDelay": 10,
 	"MaxFarmingTime": 10,
