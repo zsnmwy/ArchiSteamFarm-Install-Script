@@ -246,12 +246,16 @@ Check_system_Install_NetCore() {
 		echo -e "${OK} ${GreenBG} 当前系统为 ${ID} ${VERSION_ID} ${Font} "
 		Steam_information_account_Get
 		Steam_information_password_Get
-		Raspberry_Pi_Install
+		INS="apt-get"
+		apt-get update
+		apt-get install wget unzip curl libunwind8 gettext screen -y
 	elif [[ "${ID}" == "raspbian" && $(echo "${VERSION_ID}") -eq 8 ]]; then
 		echo -e "${OK} ${GreenBG} 当前系统为 ${ID} ${VERSION_ID} ${Font} "
 		Steam_information_account_Get
 		Steam_information_password_Get
-		Raspberry_Pi_Install
+		INS="apt-get"
+		apt-get update
+		apt-get install wget unzip curl libunwind8 gettext screen -y
 	else
 		echo -e "${Error} ${RedBG} 当前系统为 ${ID} ${VERSION_ID} 不在支持的系统列表内，安装中断 ${Font} "
 		exit 1
@@ -265,22 +269,17 @@ Check_system_Install_NetCore() {
 Raspberry_Pi_Install_ArchiSteamFarm() {
 	if [[ ! -e ${ARCHISTEAMFARM_FILES_DIR} ]]; then
 		while true; do
-			apt-get update
-			apt-get install wget unzip curl libunwind8 gettext -y
-			mkdir /tmp/
 			if [[ ${qcloud_enable} == "1" ]]; then
-				wget --no-check-certificate -P /tmp/ -O ArchiSteamFarm.zip http://p2feur8d9.bkt.clouddn.com/ASF-linux-arm.zip
+				wget --no-check-certificate -O ArchiSteamFarm.zip http://p2feur8d9.bkt.clouddn.com/ASF-linux-arm.zip
 			else
-				wget --no-check-certificate -P /tmp/ -O ArchiSteamFarm.zip https://github.com/JustArchi/ArchiSteamFarm/releases/download/3.1.1.1/ASF-linux-arm.zip
-
+				wget --no-check-certificate -O ArchiSteamFarm.zip $(curl -s 'https://api.github.com/repos/JustArchi/ArchiSteamFarm/releases/latest' | grep -Po '"browser_download_url": "\K.*?(?=")' | grep linux-arm)
 			fi
-			if [[ -e /tmp/ArchiSteamFarm.zip ]]; then
-				cd /tmp/
+			if [[ -e ArchiSteamFarm.zip ]]; then
 				echo -e "下载完成"
-				unzip -d ${ARCHISTEAMFARM_FILES_DIR} /tmp/ArchiSteamFarm.zip
-				rm /tmp/ArchiSteamFarm.zip
+				unzip -d ${ARCHISTEAMFARM_FILES_DIR} ArchiSteamFarm.zip
+				rm ArchiSteamFarm.zip
 				cd ${ARCHISTEAMFARM_FILES_DIR}
-				chmod 755 ./ArchiSteamFarm
+				chmod 777 ./ArchiSteamFarm
 				echo -e "\n ${Info} ArchiSteamFarm-arm 安装完成，继续..."
 				break
 			else
@@ -291,16 +290,15 @@ Raspberry_Pi_Install_ArchiSteamFarm() {
 		echo -e "\n ${Info} ArchiSteamFarm 已安装，继续..."
 	fi
 }
-
+# check ok
 Raspberry_Pi_Install_Dotnet() {
 	while true; do
 		if [[ ${qcloud_enable} == "1" ]]; then
-			wget -P /root/ http://p2feur8d9.bkt.clouddn.com/dotnet-runtime-latest-linux-arm.tar.gz
+			wget http://p2feur8d9.bkt.clouddn.com/dotnet-runtime-latest-linux-arm.tar.gz
 		else
-			wget --no-check-certificate -P /root/ https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-linux-arm.tar.gz
+			wget --no-check-certificate https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-linux-arm.tar.gz
 		fi
-		if [[ -e /root/dotnet-runtime-latest-linux-arm.tar.gz ]]; then
-			cd /root
+		if [[ -e dotnet-runtime-latest-linux-arm.tar.gz ]]; then
 			mkdir -p /opt/dotnet
 			tar zxf dotnet-runtime-latest-linux-arm.tar.gz -C /opt/dotnet
 			ln -s /opt/dotnet/dotnet /usr/local/bin
@@ -402,7 +400,7 @@ Add_cron_update_hosts_steamcommunity() {
 		if [[ ${qcloud_enable} == "1" ]]; then
 			wget http://p2feur8d9.bkt.clouddn.com/Add_cron_update_hosts_steamcommunity.sh
 		else
-			wget --no-check-certificate https://github.com/zsnmwy/Temporary-storage/releases/download/V0.5/Add_cron_update_hosts_steamcommunity.sh
+			wget --no-check-certificate $(curl -s 'https://api.github.com/repos/zsnmwy/Temporary-storage/releases/latest' | grep -Po '"browser_download_url": "\K.*?(?=")' | grep Add_cron_update_hosts_steamcommunity.sh)
 		fi
 		if [[ -e Add_cron_update_hosts_steamcommunity.sh ]]; then
 			chmod 777 Add_cron_update_hosts_steamcommunity.sh
@@ -421,7 +419,7 @@ Remove_hosts_log_week() {
 		if [[ ${qcloud_enable} == "1" ]]; then
 			wget http://p2feur8d9.bkt.clouddn.com/Remove_hosts_log_week.sh
 		else
-			wget --no-check-certificate https://github.com/zsnmwy/Temporary-storage/releases/download/V0.5/Remove_hosts_log_week.sh
+			wget --no-check-certificate $(curl -s 'https://api.github.com/repos/zsnmwy/Temporary-storage/releases/latest' | grep -Po '"browser_download_url": "\K.*?(?=")' | grep Remove_hosts_log_week.sh)
 		fi
 		if [[ -e Remove_hosts_log_week.sh ]]; then
 			chmod 777 Remove_hosts_log_week.sh
@@ -440,7 +438,7 @@ ArchiSteamFarm_Install() {
 		if [[ ${qcloud_enable} == "1" ]]; then
 			wget --no-check-certificate -P /root/ -O ArchiSteamFarm.zip http://p2feur8d9.bkt.clouddn.com/ASF-generic.zip
 		else
-			wget --no-check-certificate -P /root/ -O ArchiSteamFarm.zip $(curl -s https://api.github.com/repos/JustArchi/ArchiSteamFarm/releases/latest | jq -r '.assets[0].browser_download_url')
+			wget --no-check-certificate -P /root/ -O ArchiSteamFarm.zip $(curl -s 'https://api.github.com/repos/JustArchi/ArchiSteamFarm/releases/latest' | grep -Po '"browser_download_url": "\K.*?(?=")' | grep generic)
 		fi
 
 		if [[ -e /root/ArchiSteamFarm.zip ]]; then
@@ -622,22 +620,22 @@ EOF
 	cd /root
 }
 
-Add_start_pm2_yaml() {
+Add_start_script_pm2_bash_PI() {
 	mkdir -p /opt/Manage_ArchiSteamFarm
-	touch /opt/Manage_ArchiSteamFarm/ArchiSteamFarm.yaml
-	cat >/opt/Manage_ArchiSteamFarm/ArchiSteamFarm.yaml <<EOF
-apps:
-  - script   : "ArchiSteamFarm.sh"
-    name     : "ArchiSteamFarm"
-    instances: 2
-    exec_mode: fork
-    cwd      : "/opt/Manage_ArchiSteamFarm"
-    watch    : false
-    interpreter: "/bin/bash"
-    env      :
-      NODE_ENV: /opt/ArchiSteamFarm:/opt/ArchiSteamFarm:/usr/bin
+	touch /opt/Manage_ArchiSteamFarm/ArchiSteamFarm.sh
+	cd /opt/Manage_ArchiSteamFarm
+	chmod 777 ArchiSteamFarm.sh
+	cat >/opt/Manage_ArchiSteamFarm/ArchiSteamFarm.sh <<EOF
+#!/usr/bin/env bash
+PATH=/opt/ArchiSteamFarm:/usr/bin
+export PATH
+cd /opt/ArchiSteamFarm
+./ArchiSteamFarm
 EOF
+	cd /root
 }
+
+
 
 Manage_ArchiSteamFarm_normal_start_app() {
 	ArchiSteamFarm_get_id_pm2=$(pm2 ls | grep ArchiSteamFarm)
@@ -721,12 +719,16 @@ Check_ArchiSteamFarm_App_online() {
 }
 
 Check_ArchiSteamFarm_install_succeed() {
-	dotnet_version=$(dotnet --version)
+	if [[ "${ID}" == "raspbian" ]]; then
+		dotnet_version=$(dotnet --info |grep Version |cut -d ':' -f2)
+	else
+		dotnet_version=$(dotnet --version)
+	fi
 	pm2_version=$(pm2 -v)
 	nvm_version=$(nvm --version)
 	node_version=$(node -v)
 	echo -e "\n\n${Info} ${GreenBG} 最后进行安装完整性确认 ${Font} \n"
-	echo -e "${Info} ${RedBG} 若出现的版本号不是类似于 2.0.0   V8.11.1   请检查日志 ${Font}"
+	echo -e "${Info} ${RedBG} 若出现的版本号不是类似于 2.0.0   V8.11.1  2.1.0-preview3-26413-05 请检查日志 ${Font}"
 	echo -e "${Info} ${RedBG} dotnet的版本为 ${Font} ${dotnet_version}"
 	echo -e "${Info} ${RedBG} pm2的版本为 ${Font}   ${pm2_version}"
 	echo -e "${Info} ${RedBG} nvm的版本为 ${Font}   ${nvm_version}"
@@ -786,17 +788,28 @@ Remove_all_file() {
 	rm /etc/cron.hourly/Add_cron_update_hosts_steamcommunity.sh
 	rm -r ${ARCHISTEAMFARM_FILES_DIR}
 	rm -r /opt/Manage_ArchiSteamFarm
+	if [[ "${ID}" == "raspbian" ]] ;then
+		rm -r /opt/dotnet
+	fi
 }
 
 Raspberry_Pi_Install() {
-	Raspberry_Pi_Install_Dotnet
+	Is_root
+	Check_system_bit
+	Check_install_ArchiSteamFarm
+	Qcloud_source
+	Check_system_Install_NetCore
 	Raspberry_Pi_Install_ArchiSteamFarm
+	Raspberry_Pi_Install_Dotnet
 	Install_nvm_node_V8.11.1_PM2
-	Add_hosts_steamcommunity
-	Steam_information_account_Get
-	Steam_information_password_Get
 	Bot_Add
-	ArchiSteamFarm_json_English_change_to_zh-CN
+	Add_start_script_pm2_bash_PI
+	Add_cron_update_hosts_steamcommunity
+	Add_hosts_steamcommunity
+	Remove_hosts_log_week
+	Choose_language
+	Source_bash
+	Check_ArchiSteamFarm_install_succeed
 }
 
 General_install() {
@@ -804,14 +817,10 @@ General_install() {
 	Check_system_bit
 	Check_install_ArchiSteamFarm
 	Qcloud_source
-	#Github_hosts
-	#Nrm_source
 	Check_system_Install_NetCore
 	Install_nvm_node_V8.11.1_PM2
-	JQ_install
 	ArchiSteamFarm_Install
 	Bot_Add
-	#Add_start_pm2_yaml
 	Add_start_script_pm2_bash
 	Add_cron_update_hosts_steamcommunity
 	Add_hosts_steamcommunity
@@ -908,7 +917,12 @@ https://github.com/zsnmwy/ArchiSteamFarm-Install-Script
 
 	case $aNumber in
 	1)
-		General_install
+		if [[ "${ID}" == "raspbian" ]];then
+			echo -e "${Info} ${GreenBG} rapbian install start ${Font}"
+			Raspberry_Pi_Install
+		else
+			General_install
+		fi
 		;;
 	2)
 		Manage_ArchiSteamFarm_Panel
