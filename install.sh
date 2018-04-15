@@ -116,6 +116,7 @@ Check_system_Install_NetCore() {
 		INS="yum"
 		rpm --import https://packages.microsoft.com/keys/microsoft.asc
 		sh -c 'echo -e "[packages-microsoft-com-prod]\nname=packages-microsoft-com-prod \nbaseurl=https://packages.microsoft.com/yumrepos/microsoft-rhel7.3-prod\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/dotnetdev.repo'
+		echo 'exclude=*preview*' >> /etc/yum.repos.d/dotnetdev.repo
 		yum update -y
 		yum install -y unzip curl libunwind libicu wget unzip screen
 		yum install -y dotnet-sdk-2.0.0
