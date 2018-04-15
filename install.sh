@@ -38,6 +38,61 @@ source /etc/os-release
 VERSION=$(echo ${VERSION} | awk -F "[()]" '{print $2}')
 BIT=$(uname -m)
 
+Change_IPC(){
+	if [[ -e ${ARCHISTEAMFARM_FILES_DIR} ]]; then
+		IPC_IP=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep -Po '(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)')
+		IPC_Port=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep -Po '(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d):\K.*?(?=")')
+		IPC_Password=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep -Po '"IPCPassword": \K.*?(?=,)')
+		ehco -e "${Info} 当前的IPC地址为 ${IPC_IP}"
+		echo -e "${Info} 当前的IPC端口为 ${IPC_Port}"
+		if [[ "${IPC_Password}" == "null" ]]; then
+			echo -e "${Info} ${RedBG} 没有设置IPC密码 ${Font}"
+		else
+			echo -e "${Info} 当前IPC密码为${IPC_Password}"
+		fi
+		echo -e "\n\n
+		1.修改IPC地址
+		2.修改IPC端口
+		3.修改IPC密码
+		4.返回上一层
+		5.退出脚本
+		"
+		echo -e "${Info} ${RedBG} 请问你想？(输入数字) ${Font}" && read aNumber
+		case $aNumber in
+			1)
+			while true ; do
+				echo -e "输入你想要更换的IPC地址"
+				stty erase '^H' && read -p "(输入的格式为IP地址):" IPC-hosts
+				IPC-hosts-check=$(echo "IPC-hosts" | grep -Po '(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)')
+				if [[ -n ${IPC-hosts-check} || ${IPC-hosts} == "*" ]]; then
+					sed -i -e 's#'"$(echo ${IPC_IP})"'#'"$(echo $(IPC-hosts))"'#' ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json
+					IPC_IP=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep -Po '(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)')
+					if [[ "${IPC_IP}" == "${IPC-hosts}" ]]; then
+						echo -e "${OK} ${GreenBG} 修改IPC地址成功 ${Font}"
+						sleep 3
+						break
+					else
+						echo -e "${Error} ${RedBG} 修改IPC地址失败 请再次尝试 或者换个地址试试 ${Font}"
+					fi
+				else
+					echo -e "${Error} ${RedBG} 输入的内容不符合IP地址规则 请重新输入"
+				fi
+			done
+			;;
+			2|3) echo 2 or 3
+			;;
+			*) echo default
+			;;
+		esac
+		
+
+	else
+		echo -e  "${Info} ${RedBG} 没有安装ArchiSteamFarm 请先安装 ${Font}"
+	fi
+
+}
+
+
 Centos_Disable_Firewalld_Enable_Iptables() {
 	echo -e "${Info} ${GreenBG} 尝试停止Firewalld ${Font}"
 	systemctl stop firewalld
