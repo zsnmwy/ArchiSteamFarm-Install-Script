@@ -38,6 +38,183 @@ source /etc/os-release
 VERSION=$(echo ${VERSION} | awk -F "[()]" '{print $2}')
 BIT=$(uname -m)
 
+Change_IPC() {
+	if [[ -e ${ARCHISTEAMFARM_FILES_DIR} ]]; then
+		IPC_IP=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep http | cut -d '"' -f2 | cut -d '/' -f3 | cut -d ':' -f1)
+		IPC_Port=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep http | cut -d '"' -f2 | cut -d '/' -f3 | cut -d ':' -f2)
+		IPC_Password=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep -Po '"IPCPassword": \K.*?(?=,)')
+		echo -e "${Info} ${RedBG}若有外部的防火墙的商家，如腾讯云 阿里云${Font} \n${Info} ${RedBG}请手动到管理面板开启对应的IPC端口${Font}"
+		echo -e "\n\n${Info} 当前的IPC地址为 ${IPC_IP}"
+		echo -e "${Info} 当前的IPC端口为 ${IPC_Port}"
+		if [[ "${IPC_Password}" == "null" ]]; then
+			echo -e "${Info} ${RedBG} 没有设置IPC密码 ${Font}"
+		else
+			echo -e "${Info} 当前IPC密码为 ${IPC_Password}"
+		fi
+		echo -e "\n
+	1.修改IPC地址
+	2.修改IPC端口
+	3.修改IPC密码
+	4.使用IPtables命令开放IPC端口(不做任何检测)
+	5.返回上一层
+	6.退出脚本
+		"
+		echo -e "${Info} ${RedBG} 请问你想？(输入数字) ${Font}" && read aNumber
+		case $aNumber in
+		1)
+			Change_IPC_IP
+			;;
+		2)
+			Change_IPC_Port
+			;;
+		3)
+			Change_IPC_PassWord
+			;;
+		4)
+			Iptables_Open_Port		
+			;;
+		5)
+			Start_Panel
+			;;
+		6)
+			exit 0
+			;;
+		*)
+			Change_IPC
+			;;
+		esac
+
+	else
+
+		echo -e "${Info} ${RedBG} 没有安装ArchiSteamFarm 请先安装 ${Font}"
+	fi
+
+}
+
+Change_IPC_IP() {
+	while true; do
+		echo -e "输入你想要更换的IPC地址"
+		stty erase '^H' && read -p "如果接受任意IP地址访问请输入 * 否则请输入标准的IP地址:" IPC_hosts
+		IPC_hosts_check=$(echo ${IPC_hosts} | grep -Po '(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)')
+		echo -e "IPC_HOSTS_CHECK ${IPC_hosts_check}"
+		if [[ -n ${IPC_hosts_check} ]] || [[ "${IPC_hosts}" == "*" ]]; then
+			echo -e "修改阶段 ${IPC_hosts}"
+			if [[ "${IPC_hosts}" == "*" ]]; then
+				sed -i -e 's#'"$(echo ${IPC_IP})"'#'\*'#' ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json
+				echo -e "修改成了小星星"
+			elif [[ "${IPC_IP}" == "*" ]]; then
+				sed -i -e 's#\*#'"$(echo ${IPC_hosts})"'#' ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json
+				echo -e "从*修改成了IP地址"
+			else
+				sed -i -e 's#'"$(echo ${IPC_IP})"'#'"$(echo ${IPC_hosts})"'#' ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json
+				echo -e "从IP地址修改成了IP地址"
+			fi
+			IPC_IP=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep http | cut -d '"' -f2 | cut -d '/' -f3 | cut -d ':' -f1)
+			echo -e "修改完之后 ${IPC_IP}"
+			if [[ "${IPC_IP}" == "${IPC_hosts}" ]] || [[ "${IPC_IP}" == "*" ]]; then
+				echo -e "${OK} ${GreenBG} 修改IPC地址成功 ${Font}"
+				sleep 3
+				Change_IPC
+			else
+				echo -e "${Error} ${RedBG} 修改IPC地址失败 请再次尝试 或者换个地址试试 ${Font}"
+				exit 1
+			fi
+		else
+			echo -e "${Error} ${RedBG} 输入的内容不符合IP地址规则或不是* 请重新输入 ${Font} \n"
+		fi
+	done
+}
+
+Change_IPC_Port(){
+	while true
+		do
+		echo -e "请输入IPC监听端口 [1-65535]"
+		stty erase '^H' && read -p "(默认端口:1242 ):" ipc_port
+		[[ -z "${ipc_port}" ]] && ipc_port="80"
+		expr ${ipc_port} + 0 &>/dev/null
+		if [[ "${IPC_Password}" != "${ipc_port}" ]];then
+			if [[ $? -eq 0 ]]; then
+				if [[ ${ipc_port} -ge 1 ]] && [[ ${ipc_port} -le 65535 ]]; then
+					echo && echo "========================"
+					echo -e "	端口 : ${Red_background_prefix} ${ipc_port} ${Font_color_suffix}"
+					echo "========================" && echo
+					port_exist_check ${ipc_port}
+					echo -e "${Info} ${GreenBG} 尝试修改IPC端口 ${Font}"
+					sed -i 's/'"$(echo ${IPC_Port})"'/'"$(echo ${ipc_port})"'/' ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json
+					IPC_Port=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep http | cut -d '"' -f2 | cut -d '/' -f3 | cut -d ':' -f2)
+					if [[ "${IPC_Port}" == "${ipc_port}" ]]; then
+						echo -e "${OK} ${GreenBG} 修改IPC端口成功 ${Font}"
+						sleep 3
+						Change_IPC
+					else
+						echo -e "${Error} ${RedBG} 修改IPC端口失败 换个端口再试试？${Font}"
+						exit 1
+					fi
+				else
+					echo "输入错误, 请输入正确的端口。"
+				fi
+			else
+				echo "输入错误, 请输入正确的端口。"
+			fi
+		else
+			ehco -e "${Error} ${RedBG} IPC密码和IPC端口不能够相同 ${Font}"
+		fi
+	done
+}
+
+port_exist_check(){
+    if [[ 0 -eq `lsof -i:"$1" | wc -l` ]];then
+        echo -e "${OK} ${GreenBG} $1 端口未被占用 ${Font}"
+        sleep 1
+    else
+        echo -e "${Error} ${RedBG} 检测到 $1 端口被占用，以下为 $1 端口占用信息 ${Font}"
+        lsof -i:"$1"
+        echo -e "${OK} ${GreenBG} 5s 后将尝试自动 kill 占用进程 ${Font}"
+        sleep 5
+        lsof -i:"$1" | awk '{print $2}'| grep -v "PID" | xargs kill -9
+        echo -e "${OK} ${GreenBG} kill 完成 ${Font}"
+        sleep 1
+    fi
+}
+
+Change_IPC_PassWord() {
+	while true; do
+		#clear
+		echo -e "\n"
+		read -s -p "输入你的IPC密码 (越复杂越好)：" ipc_password_first
+		echo -e "\n"
+		echo -e "\n"
+		read -s -p "再次输入你的IPC密码 (越复杂越好)：" ipc_password_second
+		if [[ "${ipc_password_second}" != "${IPC_Port}" ]];then
+			if [[ ${ipc_password_first} == ${ipc_password_second} ]]; then
+				echo -e "${Info} ${GreenBG} 尝试修改IPC密码 ${Font}"
+				sed -i 's/'"$(echo ${IPC_Password})"'/'"$(echo ${ipc_password_second})"'/' ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json
+				IPC_Password=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep -Po '"IPCPassword": \K.*?(?=,)')
+				if [[ "${IPC_Password}" == "${ipc_password_second}" ]]; then
+					echo -e "${OK} ${GreenBG} 修改IPC密码成功 ${Font}"
+					sleep 3
+					Change_IPC
+				else
+					echo -e "${Error} ${RedBG} 修改IPC密码失败 换个密码再试试？${Font}"
+				fi
+			else
+				echo -e "${Error} ${RedBG} 两次输入的密码不正确 ! 重新输入 ${Font}"
+			fi
+		else
+			echo -e "${Error} ${RedBG} IPC密码和IPC端口不能够相同 ${Font}"
+		fi
+	done
+}
+
+Iptables_Open_Port(){
+	echo -e "${Info} ${RedBG} 十五秒后尝试使用IPtables命令开启IPC端口${Font}"
+	sleep 15
+	iptables -I INPUT -p tcp --dport ${IPC_Port} -j ACCEPT
+	iptables -I INPUT -p udp --dport ${IPC_Port} -j ACCEPT
+	iptables -L
+	echo -e "${Info} ${RedBG} 请检测上面的IPtables链 ${Font}\n${Info} ${RedBG} 若是centos7的系统，应该会报错${Font}"
+}
+
 Centos_Disable_Firewalld_Enable_Iptables() {
 	echo -e "${Info} ${GreenBG} 尝试停止Firewalld ${Font}"
 	systemctl stop firewalld
@@ -436,16 +613,16 @@ ArchiSteamFarm_Install() {
 	while true; do
 		echo -e "${Info} ${GreenBG} 获取 ArchiSteamFarm 最新稳定版 ${Font}"
 		if [[ ${qcloud_enable} == "1" ]]; then
-			wget --no-check-certificate -P /root/ -O ArchiSteamFarm.zip http://p2feur8d9.bkt.clouddn.com/ASF-generic.zip
+			wget --no-check-certificate -O ArchiSteamFarm.zip http://p2feur8d9.bkt.clouddn.com/ASF-generic.zip
 		else
-			wget --no-check-certificate -P /root/ -O ArchiSteamFarm.zip $(curl -s 'https://api.github.com/repos/JustArchi/ArchiSteamFarm/releases/latest' | grep -Po '"browser_download_url": "\K.*?(?=")' | grep generic)
+			wget --no-check-certificate -O ArchiSteamFarm.zip $(curl -s 'https://api.github.com/repos/JustArchi/ArchiSteamFarm/releases/latest' | grep -Po '"browser_download_url": "\K.*?(?=")' | grep generic)
 		fi
 
-		if [[ -e /root/ArchiSteamFarm.zip ]]; then
+		if [[ -e ArchiSteamFarm.zip ]]; then
 			echo -e "${Info} ${GreenBG} 下载完成 开始解压 ${Font}"
-			unzip -o -d ${ARCHISTEAMFARM_FILES_DIR} /root/ArchiSteamFarm.zip
+			unzip -o -d ${ARCHISTEAMFARM_FILES_DIR} ArchiSteamFarm.zip
 			echo -e "${OK} ${GreenBG} 解压完成 ${Font}"
-			rm /root/ArchiSteamFarm.zip
+			rm ArchiSteamFarm.zip
 			break
 		else
 			echo -e "${Error} ${RedBG} 网络超时 下载失败 重新下载 ${Font}"
@@ -635,8 +812,6 @@ EOF
 	cd /root
 }
 
-
-
 Manage_ArchiSteamFarm_normal_start_app() {
 	ArchiSteamFarm_get_id_pm2=$(pm2 ls | grep ArchiSteamFarm)
 	if [[ -n ${ArchiSteamFarm_get_id_pm2} ]]; then
@@ -720,7 +895,7 @@ Check_ArchiSteamFarm_App_online() {
 
 Check_ArchiSteamFarm_install_succeed() {
 	if [[ "${ID}" == "raspbian" ]]; then
-		dotnet_version=$(dotnet --info |grep Version |cut -d ':' -f2)
+		dotnet_version=$(dotnet --info | grep Version | cut -d ':' -f2)
 	else
 		dotnet_version=$(dotnet --version)
 	fi
@@ -788,7 +963,7 @@ Remove_all_file() {
 	rm /etc/cron.hourly/Add_cron_update_hosts_steamcommunity.sh
 	rm -r ${ARCHISTEAMFARM_FILES_DIR}
 	rm -r /opt/Manage_ArchiSteamFarm
-	if [[ "${ID}" == "raspbian" ]] ;then
+	if [[ "${ID}" == "raspbian" ]]; then
 		rm -r /opt/dotnet
 	fi
 }
@@ -893,31 +1068,32 @@ ${Green_font_prefix}9.${Font_color_suffix}退出
 
 Start_Panel() {
 	echo -e "
-欢迎使用一键搭建ArchiSteamFarm 云挂卡脚本 V1.0
-Author:zsnmwy
-Github:zsnmwy
-steam:总是那么无语
-steamcn:总是那么无语
-bilibili:总是那么无语
+	欢迎使用一键搭建ArchiSteamFarm 云挂卡脚本 V1.0
+	Author:zsnmwy
+	Github:zsnmwy
+	steam:总是那么无语
+	steamcn:总是那么无语
+	bilibili:总是那么无语
 
-来加我好友(*@ο@*) 哇～
-来GitHub给个小星星啦
-https://github.com/zsnmwy/ArchiSteamFarm-Install-Script
+	来加我好友(*@ο@*) 哇～
+	来GitHub给个小星星啦
+	https://github.com/zsnmwy/ArchiSteamFarm-Install-Script
 
-提供七牛云源，流量为作者的免费流量
-国外的机子就不要用啦
-用了七牛云源，发现不断报错拉不下，就是没有流量了ㄟ(▔,▔)ㄏ
+	提供七牛云源，流量为作者的免费流量
+	国外的机子就不要用啦
+	用了七牛云源，发现不断报错拉不下，就是没有流量了ㄟ(▔,▔)ㄏ
 
-1.安装
-2.管理
-3.退出脚本"
+	1.安装
+	2.管理
+	3.退出脚本
+	4.IPC设置"
 
 	menu_status_ArchiSteamFarm
-	echo "你的选择是(数字):" && read aNumber
+	echo -e "\n ${Info} ${RedBG} 你的选择是(数字): ${Font}" && read aNumber
 
 	case $aNumber in
 	1)
-		if [[ "${ID}" == "raspbian" ]];then
+		if [[ "${ID}" == "raspbian" ]]; then
 			echo -e "${Info} ${GreenBG} rapbian install start ${Font}"
 			Raspberry_Pi_Install
 		else
@@ -929,6 +1105,9 @@ https://github.com/zsnmwy/ArchiSteamFarm-Install-Script
 		;;
 	3)
 		exit 0
+		;;
+	4)
+		Change_IPC
 		;;
 	*)
 		Start_Panel
