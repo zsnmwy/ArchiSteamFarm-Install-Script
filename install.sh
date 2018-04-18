@@ -289,6 +289,7 @@ Check_system_Install_NetCore() {
 		echo "这里是centos7的配置"
 		echo -e "${OK} ${GreenBG} 当前系统为 Centos ${VERSION_ID} ${VERSION} ${Font} "
 		Steam_information_account_Get
+		Steam_information_SteamOwnerID_Get
 		INS="yum"
 		rpm --import https://packages.microsoft.com/keys/microsoft.asc
 		sh -c 'echo -e "[packages-microsoft-com-prod]\nname=packages-microsoft-com-prod \nbaseurl=https://packages.microsoft.com/yumrepos/microsoft-rhel7.3-prod\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/dotnetdev.repo'
@@ -308,6 +309,7 @@ Check_system_Install_NetCore() {
 		echo "这里是Debian8的配置"
 		echo -e "${OK} ${GreenBG} 当前系统为 Debian ${VERSION_ID} ${Font} "
 		Steam_information_account_Get
+		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
 		apt-get install -y curl libunwind8 gettext apt-transport-https wget unzip screen liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g
@@ -328,6 +330,7 @@ Check_system_Install_NetCore() {
 		echo "这里是Debian9的配置"
 		echo -e "${OK} ${GreenBG} 当前系统为 Debian ${VERSION_ID} ${Font} "
 		Steam_information_account_Get
+		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
 		apt-get install -y curl libunwind8 gettext apt-transport-https wget unzip screen liblttng-ust0 libcurl3 libssl1.0.2 libuuid1 libkrb5-3 zlib1g
@@ -347,6 +350,7 @@ Check_system_Install_NetCore() {
 		echo "这里是Ubuntu 17.10的配置"
 		echo -e "${OK} ${GreenBG} 当前系统为 Ubuntu ${VERSION_ID} ${VERSION} ${Font} "
 		Steam_information_account_Get
+		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
 		apt-get install curl wget unzip screen apt-transport-https -y
@@ -366,6 +370,7 @@ Check_system_Install_NetCore() {
 		echo "这里是Ubuntu 17.04的配置"
 		echo -e "${OK} ${GreenBG} 当前系统为 Ubuntu ${VERSION_ID} ${VERSION} ${Font} "
 		Steam_information_account_Get
+		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
 		apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu57 -y
@@ -384,6 +389,7 @@ Check_system_Install_NetCore() {
 		echo "这里是Ubuntu 16的配置"
 		echo -e "${OK} ${GreenBG} 当前系统为 Ubuntu ${VERSION_ID} ${VERSION} ${Font} "
 		Steam_information_account_Get
+		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
 		apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu55 -y
@@ -403,6 +409,7 @@ Check_system_Install_NetCore() {
 		echo "这里是Ubuntu 14的配置"
 		echo -e "${OK} ${GreenBG} 当前系统为 Ubuntu ${VERSION_ID} ${VERSION} ${Font} "
 		Steam_information_account_Get
+		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
 		apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu52 -y
@@ -416,12 +423,14 @@ Check_system_Install_NetCore() {
 	elif [[ "${ID}" == "raspbian" && $(echo "${VERSION_ID}") -eq 9 ]]; then
 		echo -e "${OK} ${GreenBG} 当前系统为 ${ID} ${VERSION_ID} ${Font} "
 		Steam_information_account_Get
+		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
 		apt-get install wget unzip curl libunwind8 gettext screen -y
 	elif [[ "${ID}" == "raspbian" && $(echo "${VERSION_ID}") -eq 8 ]]; then
 		echo -e "${OK} ${GreenBG} 当前系统为 ${ID} ${VERSION_ID} ${Font} "
 		Steam_information_account_Get
+		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
 		apt-get install wget unzip curl libunwind8 gettext screen -y
@@ -757,6 +766,22 @@ Steam_information_password_Get() {
 		fi
 	done
 }
+Steam_information_SteamOwnerID_Get() {
+	while true; do
+		#clear
+		echo -e "\n"
+		read -s -p "输入你的steam大号64位ID：" Steam_account_SteamOwnerID_first
+		echo -e "\n"
+		echo -e "\n"
+		read -s -p "再次输入你的steam大号64位ID：" Steam_account_SteamOwnerID_second
+		if [[ ${Steam_account_SteamOwnerID_first} == ${Steam_account_SteamOwnerID_second} ]]; then
+			break
+		else
+			echo -e "${Error} ${RedBG} 两次输入的64位ID不正确 ! 重新输入 ${Font}"
+		fi
+	done
+}
+
 
 # 添加一个机器人/BOT 配置文件名为账户名
 Bot_Add() {
@@ -767,10 +792,12 @@ Bot_Add() {
   "PasswordFormat": 1,
   "SteamLogin": "Steam_account_account_second",
   "SteamPassword": "",
+  "SteamOwnerID": SteamID,
   "Enabled": true
 }
 EOF
 	sed -i 's/Steam_account_account_second/'"$(echo ${Steam_account_second})"'/' ${ARCHISTEAMFARM_FILES_DIR}/config/${Steam_account_second}.json
+	sed -i 's/SteamID/'"$(echo ${Steam_account_SteamOwnerID_second})"'/' ${ARCHISTEAMFARM_FILES_DIR}/config/${Steam_account_second}.json
 	echo -e "${OK} ${GreenBG} 添加BOT完成 ${Font}"
 }
 
