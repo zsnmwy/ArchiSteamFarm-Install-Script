@@ -295,7 +295,7 @@ Check_system_Install_NetCore() {
 		sh -c 'echo -e "[packages-microsoft-com-prod]\nname=packages-microsoft-com-prod \nbaseurl=https://packages.microsoft.com/yumrepos/microsoft-rhel7.3-prod\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/dotnetdev.repo'
 		echo 'exclude=*preview*' >>/etc/yum.repos.d/dotnetdev.repo
 		yum update -y
-		yum install -y unzip curl libunwind libicu wget unzip screen lttng-ust libcurl openssl-libs libuuid krb5-libs zlib
+		yum install -y unzip curl libunwind libicu wget unzip screen lttng-ust libcurl openssl-libs libuuid krb5-libs zlib lsof
 		yum install -y dotnet-sdk-2.0.0 --nogpgcheck
 		export PATH=$PATH:$HOME/dotnet
 		dotnet --version
@@ -312,7 +312,7 @@ Check_system_Install_NetCore() {
 		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
-		apt-get install -y curl libunwind8 gettext apt-transport-https wget unzip screen liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g
+		apt-get install -y curl libunwind8 gettext apt-transport-https wget unzip screen liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g lsof
 		curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-jessie-prod jessie main" > /etc/apt/sources.list.d/dotnetdev.list'
@@ -333,7 +333,7 @@ Check_system_Install_NetCore() {
 		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
-		apt-get install -y curl libunwind8 gettext apt-transport-https wget unzip screen liblttng-ust0 libcurl3 libssl1.0.2 libuuid1 libkrb5-3 zlib1g
+		apt-get install -y curl libunwind8 gettext apt-transport-https wget unzip screen liblttng-ust0 libcurl3 libssl1.0.2 libuuid1 libkrb5-3 zlib1g lsof
 		curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/dotnetdev.list'
@@ -353,7 +353,7 @@ Check_system_Install_NetCore() {
 		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
-		apt-get install curl wget unzip screen apt-transport-https -y
+		apt-get install curl wget unzip screen apt-transport-https lsof -y
 		curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-artful-prod artful main" > /etc/apt/sources.list.d/dotnetdev.list'
@@ -373,7 +373,7 @@ Check_system_Install_NetCore() {
 		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
-		apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu57 -y
+		apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu57 lsof -y
 		curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-zesty-prod zesty main" > /etc/apt/sources.list.d/dotnetdev.list'
@@ -392,7 +392,7 @@ Check_system_Install_NetCore() {
 		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
-		apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu55 -y
+		apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu55 lsof -y
 		curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-xenial-prod xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
@@ -412,7 +412,7 @@ Check_system_Install_NetCore() {
 		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
-		apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu52 -y
+		apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu52 lsof -y
 		curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-trusty-prod trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
@@ -770,10 +770,10 @@ Steam_information_SteamOwnerID_Get() {
 	while true; do
 		#clear
 		echo -e "\n"
-		read -s -p "输入你的steam大号64位ID：" Steam_account_SteamOwnerID_first
+		read -p "输入你的steam大号64位ID：" Steam_account_SteamOwnerID_first
 		echo -e "\n"
 		echo -e "\n"
-		read -s -p "再次输入你的steam大号64位ID：" Steam_account_SteamOwnerID_second
+		read -p "再次输入你的steam大号64位ID：" Steam_account_SteamOwnerID_second
 		if [[ ${Steam_account_SteamOwnerID_first} == ${Steam_account_SteamOwnerID_second} ]]; then
 			break
 		else
