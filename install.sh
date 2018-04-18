@@ -71,7 +71,7 @@ Change_IPC() {
 			Change_IPC_PassWord
 			;;
 		4)
-			Iptables_Open_Port		
+			Iptables_Open_Port
 			;;
 		5)
 			Start_Panel
@@ -125,14 +125,13 @@ Change_IPC_IP() {
 	done
 }
 
-Change_IPC_Port(){
-	while true
-		do
+Change_IPC_Port() {
+	while true; do
 		echo -e "请输入IPC监听端口 [1-65535]"
 		stty erase '^H' && read -p "(默认端口:1242 ):" ipc_port
 		[[ -z "${ipc_port}" ]] && ipc_port="80"
 		expr ${ipc_port} + 0 &>/dev/null
-		if [[ "${IPC_Password}" != "${ipc_port}" ]];then
+		if [[ "${IPC_Password}" != "${ipc_port}" ]]; then
 			if [[ $? -eq 0 ]]; then
 				if [[ ${ipc_port} -ge 1 ]] && [[ ${ipc_port} -le 65535 ]]; then
 					echo && echo "========================"
@@ -162,19 +161,19 @@ Change_IPC_Port(){
 	done
 }
 
-port_exist_check(){
-    if [[ 0 -eq `lsof -i:"$1" | wc -l` ]];then
-        echo -e "${OK} ${GreenBG} $1 端口未被占用 ${Font}"
-        sleep 1
-    else
-        echo -e "${Error} ${RedBG} 检测到 $1 端口被占用，以下为 $1 端口占用信息 ${Font}"
-        lsof -i:"$1"
-        echo -e "${OK} ${GreenBG} 5s 后将尝试自动 kill 占用进程 ${Font}"
-        sleep 5
-        lsof -i:"$1" | awk '{print $2}'| grep -v "PID" | xargs kill -9
-        echo -e "${OK} ${GreenBG} kill 完成 ${Font}"
-        sleep 1
-    fi
+port_exist_check() {
+	if [[ 0 -eq $(lsof -i:"$1" | wc -l) ]]; then
+		echo -e "${OK} ${GreenBG} $1 端口未被占用 ${Font}"
+		sleep 1
+	else
+		echo -e "${Error} ${RedBG} 检测到 $1 端口被占用，以下为 $1 端口占用信息 ${Font}"
+		lsof -i:"$1"
+		echo -e "${OK} ${GreenBG} 5s 后将尝试自动 kill 占用进程 ${Font}"
+		sleep 5
+		lsof -i:"$1" | awk '{print $2}' | grep -v "PID" | xargs kill -9
+		echo -e "${OK} ${GreenBG} kill 完成 ${Font}"
+		sleep 1
+	fi
 }
 
 Change_IPC_PassWord() {
@@ -185,7 +184,7 @@ Change_IPC_PassWord() {
 		echo -e "\n"
 		echo -e "\n"
 		read -s -p "再次输入你的IPC密码 (越复杂越好)：" ipc_password_second
-		if [[ "${ipc_password_second}" != "${IPC_Port}" ]];then
+		if [[ "${ipc_password_second}" != "${IPC_Port}" ]]; then
 			if [[ ${ipc_password_first} == ${ipc_password_second} ]]; then
 				echo -e "${Info} ${GreenBG} 尝试修改IPC密码 ${Font}"
 				sed -i 's/'"$(echo ${IPC_Password})"'/'"$(echo ${ipc_password_second})"'/' ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json
@@ -206,13 +205,14 @@ Change_IPC_PassWord() {
 	done
 }
 
-Iptables_Open_Port(){
+Iptables_Open_Port() {
 	echo -e "${Info} ${RedBG} 十五秒后尝试使用IPtables命令开启IPC端口${Font}"
 	sleep 15
 	iptables -I INPUT -p tcp --dport ${IPC_Port} -j ACCEPT
 	iptables -I INPUT -p udp --dport ${IPC_Port} -j ACCEPT
 	iptables -L
 	echo -e "${Info} ${RedBG} 请检测上面的IPtables链 ${Font}\n${Info} ${RedBG} 若是centos7的系统，应该会报错${Font}"
+	exit 0
 }
 
 Centos_Disable_Firewalld_Enable_Iptables() {
@@ -260,9 +260,9 @@ Check_system_bit() {
 	if [[ ${BIT} == 'x86_64' ]]; then
 		echo -e "${OK} ${GreenBG} 符合脚本的系统位数要求 64位 ${Font}"
 	elif [[ ${BIT} == 'armv7l' ]]; then
-		echo -e "${Info} ${GreenBG} 检测处理器为32位 可能是官方不更新系统导致的  请确保处理器为64位${Font}"
+		echo -e "${Info} ${GreenBG} 检测处理器为规格为armv7l 尝试安装${Font}"
 	elif [[ ${BIT} == 'armv8' ]]; then
-		echo -e "${OK} ${GreenBG} 符合脚本的系统位数要求 64位 ${Font}"
+		echo -e "${OK} ${GreenBG}  检测处理器为规格为armv8 尝试安装${Font}"
 	else
 		echo -e "${Error} ${RedBG} 请更换为Linux64位系统 推荐Ubuntu 16.04 ${Font}"
 		exit 1
@@ -292,10 +292,10 @@ Check_system_Install_NetCore() {
 		INS="yum"
 		rpm --import https://packages.microsoft.com/keys/microsoft.asc
 		sh -c 'echo -e "[packages-microsoft-com-prod]\nname=packages-microsoft-com-prod \nbaseurl=https://packages.microsoft.com/yumrepos/microsoft-rhel7.3-prod\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/dotnetdev.repo'
-		echo 'exclude=*preview*' >> /etc/yum.repos.d/dotnetdev.repo
+		echo 'exclude=*preview*' >>/etc/yum.repos.d/dotnetdev.repo
 		yum update -y
 		yum install -y unzip curl libunwind libicu wget unzip screen lttng-ust libcurl openssl-libs libuuid krb5-libs zlib
-		yum install -y dotnet-sdk-2.0.0
+		yum install -y dotnet-sdk-2.0.0 --nogpgcheck
 		export PATH=$PATH:$HOME/dotnet
 		dotnet --version
 		echo -e "${Info} ${GreenBG} 若出现dotnet的版本号 为安装正常 ${Font}"
@@ -310,7 +310,7 @@ Check_system_Install_NetCore() {
 		Steam_information_account_Get
 		INS="apt-get"
 		apt-get update
-		apt-get install -y curl libunwind8 gettext apt-transport-https wget unzip screen  liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g
+		apt-get install -y curl libunwind8 gettext apt-transport-https wget unzip screen liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g
 		curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
 		mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 		sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-jessie-prod jessie main" > /etc/apt/sources.list.d/dotnetdev.list'
@@ -674,7 +674,7 @@ ArchiSteamFarm_json_English_change_to_zh-CN() {
 	"InventoryLimiterDelay": 3,
 	"IPCPassword": null,
 	"IPCPrefixes": [
-		"http://127.0.0.1:1242"
+		"http://127.0.0.1:1242/"
 	],
 	"LoginLimiterDelay": 10,
 	"MaxFarmingTime": 10,
@@ -709,7 +709,7 @@ ArchiSteamFarm_json_English_change_to_zh-TW() {
 	"InventoryLimiterDelay": 3,
 	"IPCPassword": null,
 	"IPCPrefixes": [
-		"http://127.0.0.1:1242"
+		"http://127.0.0.1:1242/"
 	],
 	"LoginLimiterDelay": 10,
 	"MaxFarmingTime": 10,
@@ -804,6 +804,36 @@ EOF
 	cd /root
 }
 
+Add_start_script_pm2_server_bash() {
+	mkdir -p /opt/Manage_ArchiSteamFarm
+	touch /opt/Manage_ArchiSteamFarm/ASF-server.sh
+	cd /opt/Manage_ArchiSteamFarm
+	chmod 777 ASF-server.sh
+	cat >/opt/Manage_ArchiSteamFarm/ASF-server.sh <<EOF
+#!/usr/bin/env bash
+PATH=/opt/ArchiSteamFarm:/usr/bin
+export PATH
+cd /opt/ArchiSteamFarm
+dotnet ArchiSteamFarm.dll --server
+EOF
+	cd /root
+}
+
+Add_start_script_pm2_bash_PI_server() {
+	mkdir -p /opt/Manage_ArchiSteamFarm
+	touch /opt/Manage_ArchiSteamFarm/ASF-server.sh
+	cd /opt/Manage_ArchiSteamFarm
+	chmod 777 ASF-server.sh
+	cat >/opt/Manage_ArchiSteamFarm/ASF-server.sh <<EOF
+#!/usr/bin/env bash
+PATH=/opt/ArchiSteamFarm:/usr/bin
+export PATH
+cd /opt/ArchiSteamFarm
+./ArchiSteamFarm --server
+EOF
+	cd /root
+}
+
 Manage_ArchiSteamFarm_normal_start_app() {
 	ArchiSteamFarm_get_id_pm2=$(pm2 ls | grep ArchiSteamFarm)
 	if [[ -n ${ArchiSteamFarm_get_id_pm2} ]]; then
@@ -828,7 +858,9 @@ Manage_ArchiSteamFarm_normal_start_app() {
 Manage_ArchiSteamFarm_start_Add_app() {
 	pm2 start ArchiSteamFarm.sh
 }
-
+Manage_ArchiSteamFarm_start_Add_app_server() {
+	pm2 start ASF-server.sh
+}
 Manage_ArchiSteamFarm_restart_app() {
 	pm2 restart ArchiSteamFarm
 }
@@ -838,35 +870,77 @@ Manage_ArchiSteamFarm_stop_app() {
 }
 
 Manage_ArchiSteamFarm_delete_app() {
-	pm2 delete ArchiSteamFarm
+	ArchiSteamFarm_get_id_pm2_1_server=$(pm2 ls | grep ASF-server)
+	if [[ -n ${ArchiSteamFarm_get_id_pm2_1_server} ]]; then
+		pm2 delete ASF-server
+	fi
+	ArchiSteamFarm_get_id_pm2_1_server=$(pm2 ls | grep ArchiSteamFarm)
+	if [[ -n ${ArchiSteamFarm_get_id_pm2_1_server} ]]; then
+		pm2 delete ArchiSteamFarm
+	fi
+
 }
 
 Manage_ArchiSteamFarm_screen_start() {
 	screen -U -S bash ArchiSteamFarm.sh
 }
-
+Manage_ArchiSteamFarm_screen_start_server() {
+	screen -U -S bash ASF-server.sh
+}
 Manage_ArchiSteamFarm_log() {
-	pm2 logs ArchiSteamFarm
+	ArchiSteamFarm_get_id_pm2_1_server=$(pm2 ls | grep ASF-server)
+	if [[ -n ${ArchiSteamFarm_get_id_pm2_1_server} ]]; then
+		pm2 logs ASF-server
+	fi
+	ArchiSteamFarm_get_id_pm2_1_server=$(pm2 ls | grep ArchiSteamFarm)
+	if [[ -n ${ArchiSteamFarm_get_id_pm2_1_server} ]]; then
+		pm2 logs ArchiSteamFarm
+	fi
+
 }
 
 Check_ArchiSteamFarm_App_Add_start() {
-	ArchiSteamFarm_get_id_pm2_=$(pm2 ls | grep ArchiSteamFarm)
-	if [[ -n ${ArchiSteamFarm_get_id_pm2_} ]]; then
-		echo -e "${Info} ${RedBG} 已经添加了ArchiSteamFarm到PM2 本操作跳过 ${Font}"
+	ArchiSteamFarm_get_id_pm2_1_server=$(pm2 ls | grep ASF-server)
+	if [[ ! -n ${ArchiSteamFarm_get_id_pm2_1_server} ]]; then
+		ArchiSteamFarm_get_id_pm2_=$(pm2 ls | grep ArchiSteamFarm)
+		if [[ -n ${ArchiSteamFarm_get_id_pm2_} ]]; then
+			echo -e "${Info} ${RedBG} 已经添加了ArchiSteamFarm到PM2 本操作跳过 ${Font}"
+			Manage_ArchiSteamFarm_Panel
+			break
+		fi
+	else
+		echo -e "${Error} ${RedBG} 请先移除ArchiSteamFarm(IPC) ${Font}"
+		Manage_ArchiSteamFarm_Panel
+	fi
+}
+Check_ArchiSteamFarm_App_Add_start_server() {
+	ArchiSteamFarm_get_id_pm2_1_server=$(pm2 ls | grep ArchiSteamFarm)
+	if [[ ! -n ${ArchiSteamFarm_get_id_pm2_1_server} ]]; then
+		ArchiSteamFarm_get_id_pm2_=$(pm2 ls | grep ASF-server)
+		if [[ -n ${ArchiSteamFarm_get_id_pm2_} ]]; then
+			echo -e "${Info} ${RedBG} 已经添加了ArchiSteamFarm(IPC)到PM2 本操作跳过 ${Font}"
+			Manage_ArchiSteamFarm_Panel
+			break
+		fi
+	else
+		echo -e "${Error} ${RedBG} 请先移除ArchiSteamFarm ${Font}"
 		Manage_ArchiSteamFarm_Panel
 	fi
 }
 Check_ArchiSteamFarm_App_Add_restart_stop_delete_log() {
 	ArchiSteamFarm_get_id_pm2_1=$(pm2 ls | grep ArchiSteamFarm)
-	if [[ ! -n ${ArchiSteamFarm_get_id_pm2_1} ]]; then
-		echo -e "${Info} ${RedBG} 没有添加ArchiSteamFarm到PM2 本操作跳过 ${Font}"
+	ArchiSteamFarm_get_id_pm2_1_server=$(pm2 ls | grep ASF-server)
+	if [[ ! -n ${ArchiSteamFarm_get_id_pm2_1} ]] && [[ ! -n ${ArchiSteamFarm_get_id_pm2_1_server} ]]; then
+		echo -e "${Info} ${RedBG} 没有添加ArchiSteamFarm到PM2 或 没有添加ArchiSteamFarm(IPC)到PM2 本操作跳过 ${Font}"
+		sleep 3
 		Manage_ArchiSteamFarm_Panel
 	fi
 }
 
 Check_ArchiSteamFarm_App_Add_screen() {
 	ArchiSteamFarm_get_id_pm2_1=$(pm2 ls | grep ArchiSteamFarm)
-	if [[ ! -n ${ArchiSteamFarm_get_id_pm2_1} ]]; then
+	ArchiSteamFarm_get_id_pm2_1_server=$(pm2 ls | grep ASF-server)
+	if [[ ! -n ${ArchiSteamFarm_get_id_pm2_1} ]] || [[ ! -n ${ArchiSteamFarm_get_id_pm2_1_server} ]]; then
 		echo -e "${Info} ${RedBG} 没有添加ArchiSteamFarm到PM2 从PM2删除ArchiSteamFarm操作 跳过 ${Font}"
 	else
 		Manage_ArchiSteamFarm_delete_app
@@ -943,6 +1017,26 @@ menu_status_ArchiSteamFarm() {
 	fi
 }
 
+menu_status_ArchiSteamFarm_server() {
+	if [[ -e ${ARCHISTEAMFARM_FILES_DIR} ]]; then
+		ArchiSteamFarm_get_id_pm2=$(pm2 ls | grep ASF-server)
+		if [[ -n ${ArchiSteamFarm_get_id_pm2} ]]; then
+			ArchiSteamFarm_status=$(pm2 show ASF-server | grep status | awk -F ' ' '{print $4}')
+			if [[ ${ArchiSteamFarm_status} == "online" ]]; then
+				echo -e " ${Red_font_prefix}ASF-server${Font_color_suffix} 当前状态: ${Green_font_prefix}已安装${Font_color_suffix} 并 ${Green_font_prefix}已启动${Font_color_suffix} (已经由PM2管理)"
+			elif [[ "$ArchiSteamFarm_status" == "stopped" ]]; then
+				echo -e " ${Red_font_prefix}ASF-server${Font_color_suffix} 当前状态: ${Red_font_prefix}已安装${Font_color_suffix} 并 ${Green_font_prefix}未启动${Font_color_suffix} (已经由PM2管理)"
+			elif [[ "$ArchiSteamFarm_status" == "errored" ]]; then
+				echo -e " ${Red_font_prefix}错误${Font_color_suffix} ArchiSteamFarm-server出错 \n 请重载ArchiSteamFarm-server \n 或在管理移除ArchiSteamFarm-server后再次加入 \n 实在不行就去提issue"
+			fi
+		else
+			echo -e " ${Red_font_prefix}ASF-server${Font_color_suffix} 当前状态: ${Red_font_prefix}已安装${Font_color_suffix} 但 ${Red_font_prefix}未加入PM2进行管理${Font_color_suffix}"
+		fi
+	else
+		echo -e " ${Red_font_prefix}ASF-server${Font_color_suffix} 当前状态: ${Red_font_prefix}未安装${Font_color_suffix}"
+	fi
+}
+
 Source_bash() {
 	source ~/.bashrc
 	. ~/.bashrc
@@ -971,6 +1065,7 @@ Raspberry_Pi_Install() {
 	Install_nvm_node_V8.11.1_PM2
 	Bot_Add
 	Add_start_script_pm2_bash_PI
+	Add_start_script_pm2_bash_PI_server
 	Add_cron_update_hosts_steamcommunity
 	Add_hosts_steamcommunity
 	Remove_hosts_log_week
@@ -989,6 +1084,7 @@ General_install() {
 	ArchiSteamFarm_Install
 	Bot_Add
 	Add_start_script_pm2_bash
+	Add_start_script_pm2_server_bash
 	Add_cron_update_hosts_steamcommunity
 	Add_hosts_steamcommunity
 	Remove_hosts_log_week
@@ -1001,23 +1097,32 @@ Manage_ArchiSteamFarm_Panel() {
 	echo -e "
 ${Green_font_prefix}1.${Font_color_suffix}常规方式启动ArchiSteamFarm
 ${Green_font_prefix}2.${Font_color_suffix}添加ArchiSteamFarm到PM2进行 管理 && 启动 && 查看ArchiSteamFarm日志
-${Green_font_prefix}3.${Font_color_suffix}从PM2中移除ArchiSteamFarm
-${Green_font_prefix}4.${Font_color_suffix}查看ArchiSteamFarm的日志
+${Green_font_prefix}3.${Font_color_suffix}添加ArchiSteamFarm到PM2进行 管理 && 启动 && 查看ArchiSteamFarm日志(IPC)
+${Green_font_prefix}4.${Font_color_suffix}从PM2中移除ArchiSteamFarm
+${Green_font_prefix}5.${Font_color_suffix}查看ArchiSteamFarm的日志
 ——————————————————————————————
-${Green_font_prefix}5.${Font_color_suffix}screen方式启动ArchiSteamFarm(强烈推荐使用PM2)
+${Green_font_prefix}6.${Font_color_suffix}screen方式启动ArchiSteamFarm(强烈推荐使用PM2)
+${Green_font_prefix}7.${Font_color_suffix}screen方式启动ArchiSteamFarm(强烈推荐使用PM2)(IPC)
 ——————————————————————————————
-${Green_font_prefix}6.${Font_color_suffix}关闭Firewalld并启用IPtables(仅仅限于centos7)
+${Green_font_prefix}8.${Font_color_suffix}关闭Firewalld并启用IPtables(仅仅限于centos7)
 ——————————————————————————————
-${Green_font_prefix}7.${Font_color_suffix}移除ArchiSteamFarm(不会卸载node/nvm/.NET Core)
-${Green_font_prefix}8.${Font_color_suffix}返回上一层
-${Green_font_prefix}9.${Font_color_suffix}退出
+${Green_font_prefix}9.${Font_color_suffix}移除ArchiSteamFarm(不会卸载node/nvm/.NET Core)
+${Green_font_prefix}10.${Font_color_suffix}返回上一层
+${Green_font_prefix}11.${Font_color_suffix}退出
 "
 	menu_status_ArchiSteamFarm
+	menu_status_ArchiSteamFarm_server
 	echo "你的选择是(数字):" && read aNumber
 
 	case $aNumber in
 	1)
-		Manage_ArchiSteamFarm_normal_start_app
+		ArchiSteamFarm_get_id_pm2_1=$(pm2 ls | grep ArchiSteamFarm)
+		ArchiSteamFarm_get_id_pm2_1_server=$(pm2 ls | grep ASF-server)
+		if [[ -n ${ArchiSteamFarm_get_id_pm2_1} ]] || [[ -n ${ArchiSteamFarm_get_id_pm2_1_server} ]]; then
+			echo -e "${Error} ${RedBG} 请移除pm2里面的ArchiSteamFarm ${Font}"
+		else
+			Manage_ArchiSteamFarm_normal_start_app
+		fi
 		;;
 	2)
 		Check_ArchiSteamFarm_App_Add_start
@@ -1025,31 +1130,57 @@ ${Green_font_prefix}9.${Font_color_suffix}退出
 		Manage_ArchiSteamFarm_log
 		;;
 	3)
-		Check_ArchiSteamFarm_App_Add_restart_stop_delete_log
-		Manage_ArchiSteamFarm_delete_app
+		Check_ArchiSteamFarm_App_Add_start_server
+		IPC_Port=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep http | cut -d '"' -f2 | cut -d '/' -f3 | cut -d ':' -f2)
+		port_exist_check ${IPC_Port}
+		Check_ArchiSteamFarm_App_Add_start_server
+		Manage_ArchiSteamFarm_start_Add_app_server
+		Manage_ArchiSteamFarm_log
 		;;
 	4)
 		Check_ArchiSteamFarm_App_Add_restart_stop_delete_log
-		Manage_ArchiSteamFarm_log
+		Manage_ArchiSteamFarm_delete_app
 		;;
 	5)
-		Check_ArchiSteamFarm_App_Add_screen
-		Manage_ArchiSteamFarm_screen_start
+		Check_ArchiSteamFarm_App_Add_restart_stop_delete_log
+		Manage_ArchiSteamFarm_log
 		;;
 	6)
+		ArchiSteamFarm_get_id_pm2_1=$(pm2 ls | grep ArchiSteamFarm)
+		ArchiSteamFarm_get_id_pm2_1_server=$(pm2 ls | grep ASF-server)
+		if [[ -n ${ArchiSteamFarm_get_id_pm2_1} ]] || [[ -n ${ArchiSteamFarm_get_id_pm2_1_server} ]]; then
+			echo -e "${Error} ${RedBG} 请移除pm2里面的ArchiSteamFarm ${Font}"
+		else
+			Check_ArchiSteamFarm_App_Add_screen
+			Manage_ArchiSteamFarm_screen_start
+		fi
+		;;
+	7)
+		ArchiSteamFarm_get_id_pm2_1=$(pm2 ls | grep ArchiSteamFarm)
+		ArchiSteamFarm_get_id_pm2_1_server=$(pm2 ls | grep ASF-server)
+		if [[ -n ${ArchiSteamFarm_get_id_pm2_1} ]] || [[ -n ${ArchiSteamFarm_get_id_pm2_1_server} ]]; then
+			echo -e "${Error} ${RedBG} 请移除pm2里面的ArchiSteamFarm ${Font}"
+		else
+			IPC_Port=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep http | cut -d '"' -f2 | cut -d '/' -f3 | cut -d ':' -f2)
+			port_exist_check ${IPC_Port}
+			Check_ArchiSteamFarm_App_Add_screen
+			Manage_ArchiSteamFarm_screen_start_server
+		fi
+		;;
+	8)
 		if [[ "${ID}" == "centos" && ${VERSION_ID}="7" ]]; then
 			Centos_Disable_Firewalld_Enable_Iptables
 		else
 			echo -e "仅仅支持centos7"
 		fi
 		;;
-	7)
+	9)
 		Remove_all_file
 		;;
-	8)
+	10)
 		Start_Panel
 		;;
-	9)
+	11)
 		exit 0
 		;;
 	*)
@@ -1077,10 +1208,11 @@ Start_Panel() {
 
 	1.安装
 	2.管理
-	3.退出脚本
-	4.IPC设置"
+	3.IPC设置
+	4.退出脚本"
 
 	menu_status_ArchiSteamFarm
+	menu_status_ArchiSteamFarm_server
 	echo -e "\n ${Info} ${RedBG} 你的选择是(数字): ${Font}" && read aNumber
 
 	case $aNumber in
