@@ -38,6 +38,111 @@ source /etc/os-release
 VERSION=$(echo ${VERSION} | awk -F "[()]" '{print $2}')
 BIT=$(uname -m)
 
+User_Manage_Panel() {
+	if [[ -e ${ARCHISTEAMFARM_FILES_DIR} ]]; then
+		cd ${ARCHISTEAMFARM_FILES_DIR}/config
+		ls -1 | grep -Po '.*\.json' | grep -v minimal | grep -v example | grep -v ASF | awk -F '.' 'BEGIN{print "\n\n""STEAM ACCOUNT""\n""------------------""\n" }{print NR,"\t",$1}END{print "------------------""\n\n"}'
+		echo -e "
+因为已经采用了AES加密，这里没有密码修改功能
+密码错了，重启ASF再输就行了
+这里也没有账号配置的修改，直接开IPC功能，网页改更快啦~~~
+
+1.增加Steam账号
+2.删除Steam账号
+3.返回上一层
+4.退出
+"
+		echo -e "${Info} ${RedBG} 请问你想？(输入数字) ${Font}" && read aNumber
+		case $aNumber in
+		1)
+			User_Manage_Panel_Add_Steam_Account
+			;;
+		2)
+			User_Manage_Panel_Delete_Steam_Account
+			;;
+		3)
+			Start_Panel
+			;;
+		4)
+			exit 0
+			;;
+		*)
+			User_Manage_Panel
+			;;
+		esac
+	else
+		echo -e "${Info} ${RedBG} 没有安装ArchiSteamFarm 请先安装 ${Font}"
+	fi
+}
+User_Manage_Panel_Add_Steam_Account() {
+	while true; do
+		cd ${ARCHISTEAMFARM_FILES_DIR}/config
+		ls -1 | grep -Po '.*\.json' | grep -v minimal | grep -v example | grep -v ASF | awk -F '.' 'BEGIN{print "\n\n""STEAM ACCOUNT\n------------------\n" }{print NR,"\t",$1}END{print "------------------""\n\n"}'
+		Steam_information_account_Get
+		local check_account=$(cd ${ARCHISTEAMFARM_FILES_DIR}/config && ls | grep ${Steam_account_second})
+		if [[ -z ${check_account} ]]; then
+			Bot_Add
+			local check_account=$(cd ${ARCHISTEAMFARM_FILES_DIR}/config && ls | grep ${Steam_account_second})
+			if [[ ! -z ${check_account} ]]; then
+				echo -e "${Info} ${GreenBG} 成功添加账号配置文件 ${check_account} ${Font}"
+				sleep 3
+				exit 0
+			else
+				echo -e "${Error} ${RedBG} 添加失败 请检查${ARCHISTEAMFARM_FILES_DIR}/config文件夹 ${Font}"
+				sleep 3
+				exit 1
+			fi
+		else
+			echo -e "${Error} ${RedBG} 请检查现有账号与新建的账号是否重复${Font}"
+			sleep 4
+		fi
+	done
+}
+
+User_Manage_Panel_Delete_Steam_Account() {
+	cd ${ARCHISTEAMFARM_FILES_DIR}/config
+	ls -1 | grep -Po '.*\.json' | grep -v minimal | grep -v example | grep -v ASF | awk -F '.' 'BEGIN{print "\n\n""STEAM ACCOUNT\n------------------" }{print NR,"\t",$1}END{print "------------------""\n\n"}'
+	echo -e "
+${Info} ${RedBG} 你现在正进行着高风险操作---删除Steam账号数据${Font}
+${Info} ${RedBG} 你现在正进行着高风险操作---删除Steam账号数据${Font}
+${Info} ${RedBG} 你现在正进行着高风险操作---删除Steam账号数据${Font}
+
+${Info} ${RedBG} 此操作会把相关账号的数据从ASF的config目录全部删除！！！！${Font}
+${Info} ${RedBG} 后果自负	作者免责${Font}
+"
+	echo -e "${Info} ${GreenBG}是否继续删除Steam账号数据？${Font}"
+	stty erase '^H' && read -p "(默认: N):" account_delete_yn
+	[[ -z "${account_delete_yn}" ]] && account_delete_yn="n"
+	if [[ "${account_delete_yn}" == [Yy] ]]; then
+		while true; do
+			cd ${ARCHISTEAMFARM_FILES_DIR}/config
+			ls -1 | grep -Po '.*\.json' | grep -v minimal | grep -v example | grep -v ASF | awk -F '.' 'BEGIN{print "\n\n""STEAM ACCOUNT\n------------------" }{print NR,"\t",$1}END{print "------------------""\n\n"}'
+			echo -e "${Info} ${GreenBG}输入你想要删除的Steam账号名${Font}" && read account_delete
+			echo -e "${Info} ${GreenBG}再次输入你想要删除的Steam账号名${Font}" && read account_delete_second
+			if [[ ${account_delete} == ${account_delete_second} ]]; then
+				Manage_ArchiSteamFarm_delete_app
+				cd ${ARCHISTEAMFARM_FILES_DIR}/config
+				rm ${account_delete_second}.*
+				local check_account=$(cd ${ARCHISTEAMFARM_FILES_DIR}/config && ls | grep ${account_delete_second})
+				if [[ -z ${check_account} ]]; then
+					echo -e "${OK} ${GreenBG} 删除账号${account_delete_second} 成功${Font}"
+					sleep 4
+					exit 0
+				else
+					echo -e "${Error} ${RedBG} 删除账号${account_delete_second} 失败${Font}"
+					sleep 4
+					exit 1
+				fi
+			else
+				echo -e "${Error} ${RedBG} 两次输入Steam账号名不同 请再次尝试输入${Font}"
+				sleep 2
+			fi
+		done
+	else
+		echo -e "${Info} ${GreenBG}跳过 不删除账号${Font}"
+	fi
+
+}
 Change_IPC() {
 	if [[ -e ${ARCHISTEAMFARM_FILES_DIR} ]]; then
 		IPC_IP=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep http | cut -d '"' -f2 | cut -d '/' -f3 | cut -d ':' -f1)
@@ -46,8 +151,13 @@ Change_IPC() {
 		echo -e "${Info} ${RedBG}若有外部的防火墙的商家，如腾讯云 阿里云${Font} \n${Info} ${RedBG}请手动到管理面板开启对应的IPC端口${Font}"
 		echo -e "\n\n${Info} 当前的IPC地址为 ${IPC_IP}"
 		echo -e "${Info} 当前的IPC端口为 ${IPC_Port}"
+		check_IPC_Password=$(echo ${IPC_Password} | grep -Po '^\".*?\"$')
 		if [[ "${IPC_Password}" == "null" ]]; then
 			echo -e "${Info} ${RedBG} 没有设置IPC密码 ${Font}"
+			IPC_Password_2pass=$(echo ${IPC_Password})
+		elif [[ -n ${check_IPC_Password} ]]; then
+			IPC_Password_2pass=$(echo ${IPC_Password} | cut -d '"' -f2)
+			echo -e "${Info} 当前IPC密码为 ${IPC_Password_2pass}"
 		else
 			echo -e "${Info} 当前IPC密码为 ${IPC_Password}"
 		fi
@@ -114,13 +224,15 @@ Change_IPC_IP() {
 			if [[ "${IPC_IP}" == "${IPC_hosts}" ]] || [[ "${IPC_IP}" == "*" ]]; then
 				echo -e "${OK} ${GreenBG} 修改IPC地址成功 ${Font}"
 				sleep 3
-				Change_IPC
+				exit 0
 			else
 				echo -e "${Error} ${RedBG} 修改IPC地址失败 请再次尝试 或者换个地址试试 ${Font}"
+				sleep 3
 				exit 1
 			fi
 		else
 			echo -e "${Error} ${RedBG} 输入的内容不符合IP地址规则或不是* 请重新输入 ${Font} \n"
+			sleep 3
 		fi
 	done
 }
@@ -144,19 +256,23 @@ Change_IPC_Port() {
 					if [[ "${IPC_Port}" == "${ipc_port}" ]]; then
 						echo -e "${OK} ${GreenBG} 修改IPC端口成功 ${Font}"
 						sleep 3
-						Change_IPC
+						exit 0
 					else
 						echo -e "${Error} ${RedBG} 修改IPC端口失败 换个端口再试试？${Font}"
+						sleep 3
 						exit 1
 					fi
 				else
 					echo "输入错误, 请输入正确的端口。"
+					sleep 2
 				fi
 			else
 				echo "输入错误, 请输入正确的端口。"
+				sleep 2
 			fi
 		else
 			ehco -e "${Error} ${RedBG} IPC密码和IPC端口不能够相同 ${Font}"
+			sleep 2
 		fi
 	done
 }
@@ -186,21 +302,43 @@ Change_IPC_PassWord() {
 		read -s -p "再次输入你的IPC密码 (越复杂越好)：" ipc_password_second
 		if [[ "${ipc_password_second}" != "${IPC_Port}" ]]; then
 			if [[ ${ipc_password_first} == ${ipc_password_second} ]]; then
-				echo -e "${Info} ${GreenBG} 尝试修改IPC密码 ${Font}"
-				sed -i 's/'"$(echo ${IPC_Password})"'/'"$(echo ${ipc_password_second})"'/' ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json
-				IPC_Password=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep -Po '"IPCPassword": \K.*?(?=,)')
-				if [[ "${IPC_Password}" == "${ipc_password_second}" ]]; then
+				echo -e "\n${Info} ${GreenBG} 尝试修改IPC密码 ${Font}"
+				IPC_Password_t=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep -Po '"IPCPassword": \K.*?(?=,)')
+				check_IPC_Password=$(echo ${IPC_Password_t} | grep -Po '^\".*?\"$')
+				if [[ "${IPC_Password}" == "null" ]]; then
+					IPC_Password_2pass=$(echo ${IPC_Password_t})
+				elif [[ -n ${check_IPC_Password} ]]; then
+					IPC_Password_2pass=$(echo ${IPC_Password_t} | cut -d '"' -f2)
+				else
+					IPC_Password_2pass=$(echo ${IPC_Password_t})
+				fi
+				echo "IPC_Password_2pass ${IPC_Password_2pass}"
+				echo "ipc_password_second ${ipc_password_second}"
+				sed -i 's/'"$(echo ${IPC_Password_2pass})"'/'"$(echo ${ipc_password_second})"'/' ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json
+				IPC_Password_t=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep -Po '"IPCPassword": \K.*?(?=,)')
+				check_IPC_Password=$(echo ${IPC_Password_t} | grep -Po '^\".*?\"$')
+				if [[ "${IPC_Password}" == "null" ]]; then
+					IPC_Password_2pass=$(echo ${IPC_Password_t})
+				elif [[ -n ${check_IPC_Password} ]]; then
+					IPC_Password_2pass=$(echo ${IPC_Password_t} | cut -d '"' -f2)
+				else
+					IPC_Password_2pass=$(echo ${IPC_Password_t})
+				fi
+				if [[ "${IPC_Password_2pass}" == "${ipc_password_second}" ]]; then
 					echo -e "${OK} ${GreenBG} 修改IPC密码成功 ${Font}"
 					sleep 3
-					Change_IPC
+					exit 0
 				else
 					echo -e "${Error} ${RedBG} 修改IPC密码失败 换个密码再试试？${Font}"
+					sleep 2
 				fi
 			else
 				echo -e "${Error} ${RedBG} 两次输入的密码不正确 ! 重新输入 ${Font}"
+				sleep 2
 			fi
 		else
 			echo -e "${Error} ${RedBG} IPC密码和IPC端口不能够相同 ${Font}"
+			sleep 2
 		fi
 	done
 }
@@ -211,7 +349,7 @@ Iptables_Open_Port() {
 	iptables -I INPUT -p tcp --dport ${IPC_Port} -j ACCEPT
 	iptables -I INPUT -p udp --dport ${IPC_Port} -j ACCEPT
 	iptables -L
-	echo -e "${Info} ${RedBG} 请检测上面的IPtables链 ${Font}\n${Info} ${RedBG} 若是centos7的系统，应该会报错${Font}"
+	echo -e "${Info} ${RedBG} 请检测上面的IPtables链 ${Font}\n${Info} ${RedBG} 若是centos7的系统，应该会报错 或者 出现奇怪的IPtables链${Font}"
 	exit 0
 }
 
@@ -262,9 +400,10 @@ Check_system_bit() {
 	elif [[ ${BIT} == 'armv7l' ]]; then
 		echo -e "${Info} ${GreenBG} 检测处理器为规格为armv7l 尝试安装${Font}"
 	elif [[ ${BIT} == 'armv8' ]]; then
-		echo -e "${OK} ${GreenBG}  检测处理器为规格为armv8 尝试安装${Font}"
+		echo -e "${Info} ${GreenBG}  检测处理器为规格为armv8 尝试安装${Font}"
 	else
-		echo -e "${Error} ${RedBG} 请更换为Linux64位系统 推荐Ubuntu 16.04 ${Font}"
+		echo -e "${Error} ${RedBG} 请更换为Linux64位系统 推荐Debian9 x64 ${Font}"
+		sleep 3
 		exit 1
 	fi
 }
@@ -436,6 +575,7 @@ Check_system_Install_NetCore() {
 		apt-get install wget unzip curl libunwind8 gettext screen -y
 	else
 		echo -e "${Error} ${RedBG} 当前系统为 ${ID} ${VERSION_ID} 不在支持的系统列表内，安装中断 ${Font} "
+		sleep 2
 		exit 1
 	fi
 }
@@ -462,6 +602,7 @@ Raspberry_Pi_Install_ArchiSteamFarm() {
 				break
 			else
 				echo -e "\n ArchiSteamFarm-arm 下载失败 重新下载"
+				sleep 10
 			fi
 		done
 	else
@@ -486,6 +627,7 @@ Raspberry_Pi_Install_Dotnet() {
 			break
 		else
 			echo -e "\n dotnet下载失败 重新下载"
+			sleep 10
 		fi
 	done
 }
@@ -587,6 +729,7 @@ Add_cron_update_hosts_steamcommunity() {
 			break
 		else
 			echo -e "${Error} ${RedBG} 网络超时 下载失败 重新下载 ${Font}"
+			sleep 10
 		fi
 	done
 }
@@ -606,6 +749,7 @@ Remove_hosts_log_week() {
 			break
 		else
 			echo -e "${Error} ${RedBG} 网络超时 下载失败 重新下载 ${Font}"
+			sleep 10
 		fi
 	done
 }
@@ -627,6 +771,7 @@ ArchiSteamFarm_Install() {
 			break
 		else
 			echo -e "${Error} ${RedBG} 网络超时 下载失败 重新下载 ${Font}"
+			sleep 10
 		fi
 	done
 }
@@ -659,6 +804,7 @@ ${Green_font_prefix}3.${Font_color_suffix}English 英语
 			;;
 		*)
 			echo -e "${Error} ${RedBG} 请输入正确的数字 ${Font}"
+			sleep 1
 			;;
 		esac
 	done
@@ -690,12 +836,13 @@ ArchiSteamFarm_json_English_change_to_zh-CN() {
 	"MaxTradeHoldDuration": 15,
 	"OptimizationMode": 0,
 	"Statistics": true,
-	"SteamOwnerID": 0,
+	"SteamOwnerID": SteamID,
 	"SteamProtocols": 1,
 	"UpdateChannel": 1,
 	"UpdatePeriod": 24
 }
 EOF
+	sed -i 's#SteamID#'"$(echo ${Steam_account_SteamOwnerID_second})"'#' ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json
 	cd /root
 }
 
@@ -725,12 +872,13 @@ ArchiSteamFarm_json_English_change_to_zh-TW() {
 	"MaxTradeHoldDuration": 15,
 	"OptimizationMode": 0,
 	"Statistics": true,
-	"SteamOwnerID": 0,
+	"SteamOwnerID": SteamID,
 	"SteamProtocols": 1,
 	"UpdateChannel": 1,
 	"UpdatePeriod": 24
 }
 EOF
+	sed -i 's#SteamID#'"$(echo ${Steam_account_SteamOwnerID_second})"'#' ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json
 	cd /root
 }
 
@@ -746,6 +894,7 @@ Steam_information_account_Get() {
 			break
 		else
 			echo -e "${Error} ${RedBG} 两次输入的账号名称不正确 ! 请重新输入 ${Font}"
+			sleep 2
 		fi
 	done
 }
@@ -778,12 +927,12 @@ Steam_information_SteamOwnerID_Get() {
 			break
 		else
 			echo -e "${Error} ${RedBG} 两次输入的64位ID不正确 ! 重新输入 ${Font}"
+			sleep 2
 		fi
 	done
 }
 
-
-# 添加一个机器人/BOT 配置文件名为账户名
+# 添加一个机器人/BOT 配置文件名为账号名
 Bot_Add() {
 	echo -e "${Info} ${GreenBG} 准备添加BOT ${Font}"
 	touch ${ARCHISTEAMFARM_FILES_DIR}/config/${Steam_account_second}.json
@@ -792,12 +941,10 @@ Bot_Add() {
   "PasswordFormat": 1,
   "SteamLogin": "Steam_account_account_second",
   "SteamPassword": "",
-  "SteamOwnerID": SteamID,
   "Enabled": true
 }
 EOF
 	sed -i 's/Steam_account_account_second/'"$(echo ${Steam_account_second})"'/' ${ARCHISTEAMFARM_FILES_DIR}/config/${Steam_account_second}.json
-	sed -i 's/SteamID/'"$(echo ${Steam_account_SteamOwnerID_second})"'/' ${ARCHISTEAMFARM_FILES_DIR}/config/${Steam_account_second}.json
 	echo -e "${OK} ${GreenBG} 添加BOT完成 ${Font}"
 }
 
@@ -872,6 +1019,7 @@ Manage_ArchiSteamFarm_normal_start_app() {
 			Manage_ArchiSteamFarm_Panel
 		elif [[" $ArchiSteamFarm_status" == "errored" ]]; then
 			echo -e "${Error} ${RedBG} 检测到ArchiSteamFarm出现错误 ${Font}\n ${Info} ${RedBG} 尝试从PM2中移除ArchiSteamFarm 然后以常规方式启动ArchiSteamFarm ${Font}"
+			sleep 1
 			Manage_ArchiSteamFarm_delete_app
 			cd ${ARCHISTEAMFARM_FILES_DIR}
 			dotnet ArchiSteamFarm.dll
@@ -937,6 +1085,7 @@ Check_ArchiSteamFarm_App_Add_start() {
 		fi
 	else
 		echo -e "${Error} ${RedBG} 请先移除ArchiSteamFarm(IPC) ${Font}"
+		sleep 3
 		Manage_ArchiSteamFarm_Panel
 	fi
 }
@@ -951,6 +1100,7 @@ Check_ArchiSteamFarm_App_Add_start_server() {
 		fi
 	else
 		echo -e "${Error} ${RedBG} 请先移除ArchiSteamFarm ${Font}"
+		sleep 3
 		Manage_ArchiSteamFarm_Panel
 	fi
 }
@@ -1147,6 +1297,7 @@ ${Green_font_prefix}11.${Font_color_suffix}退出
 		ArchiSteamFarm_get_id_pm2_1_server=$(pm2 ls | grep ASF-server)
 		if [[ -n ${ArchiSteamFarm_get_id_pm2_1} ]] || [[ -n ${ArchiSteamFarm_get_id_pm2_1_server} ]]; then
 			echo -e "${Error} ${RedBG} 请移除pm2里面的ArchiSteamFarm ${Font}"
+			sleep 2
 		else
 			Manage_ArchiSteamFarm_normal_start_app
 		fi
@@ -1177,6 +1328,7 @@ ${Green_font_prefix}11.${Font_color_suffix}退出
 		ArchiSteamFarm_get_id_pm2_1_server=$(pm2 ls | grep ASF-server)
 		if [[ -n ${ArchiSteamFarm_get_id_pm2_1} ]] || [[ -n ${ArchiSteamFarm_get_id_pm2_1_server} ]]; then
 			echo -e "${Error} ${RedBG} 请移除pm2里面的ArchiSteamFarm ${Font}"
+			sleep 2
 		else
 			Check_ArchiSteamFarm_App_Add_screen
 			Manage_ArchiSteamFarm_screen_start
@@ -1187,6 +1339,7 @@ ${Green_font_prefix}11.${Font_color_suffix}退出
 		ArchiSteamFarm_get_id_pm2_1_server=$(pm2 ls | grep ASF-server)
 		if [[ -n ${ArchiSteamFarm_get_id_pm2_1} ]] || [[ -n ${ArchiSteamFarm_get_id_pm2_1_server} ]]; then
 			echo -e "${Error} ${RedBG} 请移除pm2里面的ArchiSteamFarm ${Font}"
+			sleep 2
 		else
 			IPC_Port=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep http | cut -d '"' -f2 | cut -d '/' -f3 | cut -d ':' -f2)
 			port_exist_check ${IPC_Port}
@@ -1236,7 +1389,8 @@ Start_Panel() {
 	1.安装
 	2.管理
 	3.IPC设置
-	4.退出脚本"
+	4.用户管理
+	5.退出脚本"
 
 	menu_status_ArchiSteamFarm
 	menu_status_ArchiSteamFarm_server
@@ -1258,6 +1412,9 @@ Start_Panel() {
 		Change_IPC
 		;;
 	4)
+		User_Manage_Panel
+		;;
+	5)
 		exit 0
 		;;
 	*)
