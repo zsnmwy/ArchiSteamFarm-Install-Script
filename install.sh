@@ -3,7 +3,7 @@
 #ArchiSteamFarm-Install-Script
 #Help you quickly install ASF on VPS.
 #帮助你快速地把ASF安装在VPS上面。
-#VERSION v1.0.1
+#VERSION v1.5
 #support system :
 #Tencent Debian 8.2(OK) /Debian 9(OK) /centos 7.0(OK) / Ubuntu server 14.04.1 LTS 64bit(OK) / Ubuntu 16.04.1 LTS (OK)
 #Vultr Debian9(OK)/ Debian 8（OK） / centos 7(OK) /Ubuntu 14.04 x64（OK） /Ubuntu 16.04.3 LTS(OK)/Ubuntu 17.10 x64(OK)
@@ -1382,7 +1382,7 @@ ${Green_font_prefix}11.${Font_color_suffix}退出
 
 Start_Panel() {
 	echo -e "
-	欢迎使用一键搭建ArchiSteamFarm 云挂卡脚本 V1.0
+	欢迎使用一键搭建ArchiSteamFarm 云挂卡脚本 V1.5
 	Author:zsnmwy
 	Github:zsnmwy
 	steam:总是那么无语
