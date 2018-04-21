@@ -565,14 +565,14 @@ Check_system_Install_NetCore() {
 		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
-		apt-get install wget unzip curl libunwind8 gettext screen -y
+		apt-get install wget unzip curl libunwind8 gettext screen lsof -y
 	elif [[ "${ID}" == "raspbian" && $(echo "${VERSION_ID}") -eq 8 ]]; then
 		echo -e "${OK} ${GreenBG} 当前系统为 ${ID} ${VERSION_ID} ${Font} "
 		Steam_information_account_Get
 		Steam_information_SteamOwnerID_Get
 		INS="apt-get"
 		apt-get update
-		apt-get install wget unzip curl libunwind8 gettext screen -y
+		apt-get install wget unzip curl libunwind8 gettext screen lsof -y
 	else
 		echo -e "${Error} ${RedBG} 当前系统为 ${ID} ${VERSION_ID} 不在支持的系统列表内，安装中断 ${Font} "
 		sleep 2
