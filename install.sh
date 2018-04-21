@@ -718,7 +718,7 @@ Add_cron_update_hosts_steamcommunity() {
 	while true; do
 		echo -e "${Info} ${GreenBG} 尝试获取steamcommunity hosts 更新脚本 ${Font}"
 		if [[ ${qcloud_enable} == "1" ]]; then
-			wget http://p2feur8d9.bkt.clouddn.com/Add_cron_update_hosts_steamcommunity.sh
+			wget -O Add_cron_update_hosts_steamcommunity.sh http://p2feur8d9.bkt.clouddn.com/Add_cron_update_hosts_steamcommunity%20V1.sh
 		else
 			wget --no-check-certificate $(curl -s 'https://api.github.com/repos/zsnmwy/Temporary-storage/releases/latest' | grep -Po '"browser_download_url": "\K.*?(?=")' | grep Add_cron_update_hosts_steamcommunity.sh)
 		fi
@@ -890,10 +890,15 @@ Steam_information_account_Get() {
 		read -p "输入你的steam账号名：" Steam_account_first
 		echo -e "\n"
 		read -p "再次输入你的steam账号名：" Steam_account_second
-		if [[ ${Steam_account_first} == ${Steam_account_second} ]]; then
-			break
+		if [[ -n ${Steam_account_second} ]];then
+			if [[ ${Steam_account_first} == ${Steam_account_second} ]]; then
+				break
+			else
+				echo -e "${Error} ${RedBG} 两次输入的账号名称不正确 ! 请重新输入 ${Font}"
+				sleep 2
+			fi
 		else
-			echo -e "${Error} ${RedBG} 两次输入的账号名称不正确 ! 请重新输入 ${Font}"
+			echo -e "${Error} ${RedBG} 请输入你的steam账号 ${Font}"
 			sleep 2
 		fi
 	done
@@ -923,10 +928,16 @@ Steam_information_SteamOwnerID_Get() {
 		echo -e "\n"
 		echo -e "\n"
 		read -p "再次输入你的steam大号64位ID：" Steam_account_SteamOwnerID_second
-		if [[ ${Steam_account_SteamOwnerID_first} == ${Steam_account_SteamOwnerID_second} ]]; then
-			break
+		expr ${Steam_account_SteamOwnerID_second} + 0 &>/dev/null
+		if [[ $? -eq 0 ]]; then
+			if [[ ${Steam_account_SteamOwnerID_first} == ${Steam_account_SteamOwnerID_second} ]]; then
+				break
+			else
+				echo -e "${Error} ${RedBG} 两次输入的64位ID不正确 ! 重新输入 ${Font}"
+				sleep 2
+			fi
 		else
-			echo -e "${Error} ${RedBG} 两次输入的64位ID不正确 ! 重新输入 ${Font}"
+			echo -e "${Error} ${RedBG} 请确保你输入的是数字 ${Font}"
 			sleep 2
 		fi
 	done
