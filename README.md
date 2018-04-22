@@ -29,7 +29,7 @@ English version will coming soon.
 Now Wiki(zh-CN) is available.
 
 
-![现在Wiki的V1版本的中文版已经编写完成](https://github.com/zsnmwy/ArchiSteamFarm-Install-Script/wiki)  
+![现在Wiki的V1.5版本的中文版已经编写完成](https://github.com/zsnmwy/ArchiSteamFarm-Install-Script/wiki)  
 
 更适合萌新的教程发布在Steamcn 
 
