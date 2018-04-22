@@ -595,6 +595,10 @@ Raspberry_Pi_Install_ArchiSteamFarm() {
 			if [[ -e ArchiSteamFarm.zip ]]; then
 				echo -e "下载完成"
 				unzip -d ${ARCHISTEAMFARM_FILES_DIR} ArchiSteamFarm.zip
+				if [[ $? -ne 0 ]]; then
+					echo -e "${Error} ${RedBG} 解压失败${Font}"
+					exit 1
+				fi
 				rm ArchiSteamFarm.zip
 				cd ${ARCHISTEAMFARM_FILES_DIR}
 				chmod 777 ./ArchiSteamFarm
@@ -766,6 +770,10 @@ ArchiSteamFarm_Install() {
 		if [[ -e ArchiSteamFarm.zip ]]; then
 			echo -e "${Info} ${GreenBG} 下载完成 开始解压 ${Font}"
 			unzip -o -d ${ARCHISTEAMFARM_FILES_DIR} ArchiSteamFarm.zip
+			if [[ $? -ne 0 ]]; then
+				echo -e "${Error} ${RedBG} 解压失败${Font}"
+				exit 1
+			fi
 			echo -e "${OK} ${GreenBG} 解压完成 ${Font}"
 			rm ArchiSteamFarm.zip
 			break
@@ -890,7 +898,7 @@ Steam_information_account_Get() {
 		read -p "输入你的steam账号名：" Steam_account_first
 		echo -e "\n"
 		read -p "再次输入你的steam账号名：" Steam_account_second
-		if [[ -n ${Steam_account_second} ]];then
+		if [[ -n ${Steam_account_second} ]]; then
 			if [[ ${Steam_account_first} == ${Steam_account_second} ]]; then
 				break
 			else
