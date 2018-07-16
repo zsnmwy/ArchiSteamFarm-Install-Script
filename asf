@@ -1,0 +1,177 @@
+#!/bin/bash
+
+#!/usr/bin/env bash
+#Author:zsnmwy
+
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin:/opt/ArchiSteamFarm:/opt/Manage_ArchiSteamFarm:/root/.nvm/versions/node/v8.11.1/bin
+export PATH
+
+DIR_PATH="/opt/ArchiSteamFarm"
+ARCHISTEAMFARM_FILES_DIR="/opt/ArchiSteamFarm"
+
+judge() {
+	if [[ $? -eq 0 ]]; then
+		echo -e "${OK} ${GreenBG} $1 完成 ${Font}"
+	else
+		echo -e "${Error} ${RedBG} $1 失败${Font}"
+		exit 1
+	fi
+}
+
+judge_asf() {
+	asf_id=$(pm2 ls | grep asf)
+	if [[ -n ${asf_id} ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+start() {
+	judge_asf
+	if [[ $? -eq 0 ]]; then
+		echo "asf 已经存在了！！ 本次操作跳过~~"
+		exit 1
+	fi
+	pm2 start "dotnet ${DIR_PATH}/ArchiSteamFarm.dll" -n asf
+	judge "启动方式: dotnet ${DIR_PATH}/ArchiSteamFarm.dll"
+}
+
+status() {
+	IPC_status=$(cat ${DIR_PATH}/config/ASF.json | grep -Po '"IPC": \K.*?(?=,)')
+	IPC_Password=$(cat ${DIR_PATH}/config/ASF.json | grep -Po '"IPCPassword": \K.*?(?=,)' | cut -d '"' -f2)
+	IPC_Port=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep http | cut -d '"' -f2 | cut -d '/' -f3 | cut -d ':' -f2)
+	if [[ ${IPC_status} == "true" ]]; then
+		echo -e "IPC 已经开启 \\n密码: ${IPC_Password} \\n端口: ${IPC_Port}"
+	else
+		echo "IPC 未开启"
+	fi
+	judge_asf
+	if [[ $? -eq 1 ]]; then
+		echo "asf 还没有启动哟"
+		exit 1
+	fi
+	pm2 ls
+	judge "列出PM2任务"
+}
+
+remove() {
+	judge_asf
+	if [[ $? -eq 1 ]]; then
+		echo "asf 还没有启动哟 本次操作跳过~~"
+		exit 1
+	fi
+	pm2 delete asf
+	judge "删除asf"
+}
+
+log() {
+	judge_asf
+	if [[ $? -eq 1 ]]; then
+		echo "asf 还没有启动哟 本次操作跳过~~"
+		exit 1
+	fi
+	pm2 log asf
+	judge "查看asf日志"
+}
+
+Change_IPC_Password() {
+	while true; do
+		#clear
+		echo -e "\n"
+		read -r -s -p "输入你的IPC密码 (越复杂越好)：" ipc_password_first
+		echo -e "\n"
+		echo -e "\n"
+		read -r -s -p "再次输入你的IPC密码 (越复杂越好)：" ipc_password_second
+		if [[ "${ipc_password_second}" != "${IPC_Port}" ]]; then
+			if [[ ${ipc_password_first} == ${ipc_password_second} ]]; then
+				Before_Ipc_Password_line_number=$(${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json -n | grep "IPCPassword" | awk '{print $1}')
+				Now_Icp_Password_string="\"IPCPassword\": \"${ipc_password_second}\","
+				sed -i ''"$(echo "${Before_Ipc_Password_line_number}")"'i '"$(echo "${Now_Icp_Password_string}")"'' ${DIR_PATH}/config/ASF.json
+			else
+				echo -e "${Error} ${RedBG} 两次输入的密码不正确 ! 重新输入 ${Font}"
+				sleep 2
+			fi
+		else
+			echo -e "${Error} ${RedBG} IPC密码和IPC端口不能够相同 ${Font}"
+			sleep 2
+		fi
+	done
+}
+
+Change_IPC_Port() {
+	while true; do
+		echo -e "请输入IPC监听端口 [1-65535]"
+		stty erase '^H' && read -r -p "(默认端口:1242 ):" ipc_port
+		[[ -z "${ipc_port}" ]] && ipc_port="1242"
+		expr ${ipc_port} + 0 &>/dev/null
+		if [[ $? -eq 0 ]]; then
+			if [[ ${ipc_port} -ge 1 ]] && [[ ${ipc_port} -le 65535 ]]; then
+				echo && echo "========================"
+				echo -e "	端口 : ${Red_background_prefix} ${ipc_port} ${Font_color_suffix}"
+				echo "========================" && echo
+				port_exist_check ${ipc_port}
+				echo -e "${Info} ${GreenBG} 尝试修改IPC端口 ${Font}"
+				Before_Ipc_Port_line_number=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json -n | grep "http://" | awk '{print $1}')
+				Ipc_ip=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep -Po '"http://\K.*?(?=:)')
+				Now_Ipc_Port_string="\"http://${Ipc_ip}:${ipc_port}/\""
+				sed -i ''"$(echo "${Before_Ipc_Port_line_number}")"'i '"$(echo "${Now_Ipc_Port_string}")"'' ${DIR_PATH}/config/ASF.json
+				IPC_Port=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep http | cut -d '"' -f2 | cut -d '/' -f3 | cut -d ':' -f2)
+				if [[ "${IPC_Port}" == "${ipc_port}" ]]; then
+					echo -e "${OK} ${GreenBG} 修改IPC端口成功 ${Font}"
+					sleep 3
+					exit 0
+				else
+					echo -e "${Error} ${RedBG} 修改IPC端口失败 换个端口再试试？${Font}"
+					sleep 3
+					exit 1
+				fi
+			else
+				echo "输入错误, 请输入正确的端口。"
+				sleep 2
+			fi
+		else
+			echo "输入错误, 请输入正确的端口。"
+			sleep 2
+		fi
+	done
+
+}
+
+port_exist_check() {
+	if [[ 0 -eq $(lsof -i:"$1" | wc -l) ]]; then
+		echo -e "${OK} ${GreenBG} $1 端口未被占用 ${Font}"
+		sleep 1
+	else
+		echo -e "${Error} ${RedBG} 检测到 $1 端口被占用，以下为 $1 端口占用信息 ${Font}"
+		lsof -i:"$1"
+		echo -e "${OK} ${GreenBG} 5s 后将尝试自动 kill 占用进程 ${Font}"
+		sleep 5
+		lsof -i:"$1" | awk '{print $2}' | grep -v "PID" | xargs kill -9
+		echo -e "${OK} ${GreenBG} kill 完成 ${Font}"
+		sleep 1
+	fi
+}
+
+case "$1" in
+-s | --start1)
+	start1
+	;;
+-l | --log)
+	log
+	;;
+-r | --remove)
+	remove
+	;;
+-st | --status)
+	status
+	;;
+-c)
+	Change_IPC_Password
+	;;
+-C)
+	Change_IPC_Port
+	;;
+*) echo "使用方法 asf {start | log | remove | status | -c | -C }"
+	;;
+esac

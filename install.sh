@@ -769,7 +769,7 @@ ArchiSteamFarm_Install() {
 
 		if [[ -e ArchiSteamFarm.zip ]]; then
 			echo -e "${Info} ${GreenBG} 下载完成 开始解压 ${Font}"
-			unzip -o -d ${ARCHISTEAMFARM_FILES_DIR} ArchiSteamFarm.zip
+			unzip -o ArchiSteamFarm.zip -d ${ARCHISTEAMFARM_FILES_DIR}
 			if [[ $? -eq 1 ]]; then
 				echo -e "${Error} ${RedBG} 解压失败${Font}"
 				exit 1
