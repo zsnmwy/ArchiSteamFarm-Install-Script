@@ -95,7 +95,7 @@ Change_IPC_Password() {
 		read -r -s -p "再次输入你的IPC密码 (越复杂越好)：" ipc_password_second
 		if [[ "${ipc_password_second}" != "${IPC_Port}" ]]; then
 			if [[ ${ipc_password_first} == ${ipc_password_second} ]]; then
-				Before_Ipc_Password_line_number=$(${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json -n | grep "IPCPassword" | awk '{print $1}')
+				Before_Ipc_Password_line_number=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json -n | grep "IPCPassword" | awk '{print $1}')
 				Now_Icp_Password_string="\"IPCPassword\": \"${ipc_password_second}\","
 				sed -i ''"$(echo "${Before_Ipc_Password_line_number}")"'i '"$(echo "${Now_Icp_Password_string}")"'' ${DIR_PATH}/config/ASF.json
 				break
