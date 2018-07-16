@@ -27,7 +27,16 @@ judge_asf() {
 	fi
 }
 
-start() {
+start(){
+	judge_asf
+	if [[ $? -eq 0 ]]; then
+		echo "asf 已经存在了！！ 本次操作跳过~~"
+		exit 1
+	fi
+	dotnet ${DIR_PATH}/ArchiSteamFarm.dll
+}
+
+start_bg() {
 	judge_asf
 	if [[ $? -eq 0 ]]; then
 		echo "asf 已经存在了！！ 本次操作跳过~~"
@@ -35,6 +44,7 @@ start() {
 	fi
 	pm2 start "dotnet ${DIR_PATH}/ArchiSteamFarm.dll" -n asf
 	judge "启动方式: dotnet ${DIR_PATH}/ArchiSteamFarm.dll"
+	pm2 log asf
 }
 
 status() {
@@ -88,6 +98,7 @@ Change_IPC_Password() {
 				Before_Ipc_Password_line_number=$(${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json -n | grep "IPCPassword" | awk '{print $1}')
 				Now_Icp_Password_string="\"IPCPassword\": \"${ipc_password_second}\","
 				sed -i ''"$(echo "${Before_Ipc_Password_line_number}")"'i '"$(echo "${Now_Icp_Password_string}")"'' ${DIR_PATH}/config/ASF.json
+				break
 			else
 				echo -e "${Error} ${RedBG} 两次输入的密码不正确 ! 重新输入 ${Font}"
 				sleep 2
@@ -171,6 +182,9 @@ case "$1" in
 	;;
 -C)
 	Change_IPC_Port
+	;;
+-bg)
+	start_bg
 	;;
 *) echo "使用方法 asf {start | log | remove | status | -c | -C }"
 	;;
