@@ -97,7 +97,7 @@ Change_IPC_Password() {
 			if [[ ${ipc_password_first} == ${ipc_password_second} ]]; then
 				Before_Ipc_Password_line_number=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json -n | grep "IPCPassword" | awk '{print $1}')
 				Now_Icp_Password_string="\"IPCPassword\": \"${ipc_password_second}\","
-				sed -i ''"$(echo "${Before_Ipc_Password_line_number}")"'i '"$(echo "${Now_Icp_Password_string}")"'' ${DIR_PATH}/config/ASF.json
+				sed -i ''"$(echo "${Before_Ipc_Password_line_number}")"'c '"$(echo "${Now_Icp_Password_string}")"'' ${DIR_PATH}/config/ASF.json
 				break
 			else
 				echo -e "${Error} ${RedBG} 两次输入的密码不正确 ! 重新输入 ${Font}"
@@ -126,7 +126,7 @@ Change_IPC_Port() {
 				Before_Ipc_Port_line_number=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json -n | grep "http://" | awk '{print $1}')
 				Ipc_ip=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep -Po '"http://\K.*?(?=:)')
 				Now_Ipc_Port_string="\"http://${Ipc_ip}:${ipc_port}/\""
-				sed -i ''"$(echo "${Before_Ipc_Port_line_number}")"'i '"$(echo "${Now_Ipc_Port_string}")"'' ${DIR_PATH}/config/ASF.json
+				sed -i ''"$(echo "${Before_Ipc_Port_line_number}")"'c '"$(echo "${Now_Ipc_Port_string}")"'' ${DIR_PATH}/config/ASF.json
 				IPC_Port=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json | grep http | cut -d '"' -f2 | cut -d '/' -f3 | cut -d ':' -f2)
 				if [[ "${IPC_Port}" == "${ipc_port}" ]]; then
 					echo -e "${OK} ${GreenBG} 修改IPC端口成功 ${Font}"
