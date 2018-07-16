@@ -500,6 +500,7 @@ EOF
 
 Remove_all_file() {
 	rm -r ${ARCHISTEAMFARM_FILES_DIR}
+	rm /bin/asf
 	if [[ "${ID}" == "raspbian" ]]; then
 		rm -r /opt/dotnet
 	fi
@@ -508,7 +509,7 @@ Remove_all_file() {
 ADD_asf_to_bin(){
 	cd /bin
     wget https://raw.githubusercontent.com/zsnmwy/ArchiSteamFarm-Install-Script/master/asf
-    judge "Download asf to bin"
+    Judge "Download asf to bin"
     chmod 777 asf
 }
 

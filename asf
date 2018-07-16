@@ -154,8 +154,8 @@ port_exist_check() {
 }
 
 case "$1" in
--s | --start1)
-	start1
+-s | --start)
+	start
 	;;
 -l | --log)
 	log
