@@ -262,13 +262,14 @@ Steam_information_account_Get() {
 }
 
 User_Manage_Panel_Add_Steam_Account() {
+	Steam_information_account_Get
 	while true; do
 		cd ${ARCHISTEAMFARM_FILES_DIR}/config
 		ls -1 | grep -Po '.*\.json' | grep -v minimal | grep -v example | grep -v ASF | awk -F '.' 'BEGIN{print "\n\n""STEAM ACCOUNT\n------------------\n" }{print NR,"\t",$1}END{print "------------------""\n\n"}'
-		local check_account=$(cd ${ARCHISTEAMFARM_FILES_DIR}/config && ls | grep ${Steam_account_second})
+		check_account=$(cd ${ARCHISTEAMFARM_FILES_DIR}/config && ls | grep ${Steam_account_second})
 		if [[ -z ${check_account} ]]; then
 			Bot_Add
-			local check_account=$(cd ${ARCHISTEAMFARM_FILES_DIR}/config && ls | grep ${Steam_account_second})
+			check_account=$(cd ${ARCHISTEAMFARM_FILES_DIR}/config && ls | grep ${Steam_account_second})
 			if [[ ! -z ${check_account} ]]; then
 				echo -e "${Info} ${GreenBG} 成功添加账号配置文件 ${check_account} ${Font}"
 				sleep 3
@@ -298,7 +299,7 @@ Bot_Add() {
 }
 EOF
 	sed -i 's/Steam_account_account_second/'"$(echo "${Steam_account_second}")"'/' "${ARCHISTEAMFARM_FILES_DIR}/config/${Steam_account_second}.json"
-	Judge "ADD BOT"
+	judge "ADD BOT"
 }
 
 User_Manage_Panel_Delete_Steam_Account() {
