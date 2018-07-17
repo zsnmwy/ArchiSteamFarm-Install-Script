@@ -270,7 +270,6 @@ Check_system_Install_NetCore() {
 		apt-get install aspnetcore-runtime-2.1 -y
 		dotnet --info
 		Judge "INSTALL DOTNET"
-:<<EOF
 	elif [[ "${ID}" == "ubuntu" && $(echo "${VERSION_ID}") == "18.04" ]]; then
 		## Ubuntu 18.04
 		echo "这里是Ubuntu 18.04的配置"
@@ -279,12 +278,12 @@ Check_system_Install_NetCore() {
 		apt-get update 1>/dev/null
 		apt-get install curl wget unzip screen apt-transport-https lsof -y
 		wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
-		dpkg -i packages-microsoft-prod.deb
-		apt-get update
-		apt-get install aspnetcore-runtime-2.1 -y
+		sudo dpkg -i packages-microsoft-prod.deb
+		sudo apt-get install apt-transport-https
+		sudo apt-get update
+		sudo apt-get install aspnetcore-runtime-2.1
 		dotnet --info
 		Judge "INSTALL DOTNET"
-EOF
 	elif [[ "${ID}" == "ubuntu" && $(echo "${VERSION_ID}") == "17.10" ]]; then
 		## Ubuntu 17.10
 		echo "这里是Ubuntu 17.10的配置"
