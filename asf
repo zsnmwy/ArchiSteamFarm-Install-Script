@@ -395,7 +395,8 @@ case "$1" in
 		-ipc	|				是否启用IPC
 		-c		|				更改IPC密码
 		-C		|				更改IPC端口号
-		
+		==========steam 账号管理====================
+		-acc	| --account		steam 账号管理
 		"
 	;;
 esac
