@@ -265,13 +265,13 @@ User_Manage_Panel_Add_Steam_Account() {
 	Steam_information_account_Get
 	while true; do
 		cd ${ARCHISTEAMFARM_FILES_DIR}/config
-		ls -1 | grep -Po '.*\.json' | grep -v minimal | grep -v example | grep -v ASF | awk -F '.' 'BEGIN{print "\n\n""STEAM ACCOUNT\n------------------\n" }{print NR,"\t",$1}END{print "------------------""\n\n"}'
 		check_account=$(cd ${ARCHISTEAMFARM_FILES_DIR}/config && ls | grep ${Steam_account_second})
 		if [[ -z ${check_account} ]]; then
 			Bot_Add
 			check_account=$(cd ${ARCHISTEAMFARM_FILES_DIR}/config && ls | grep ${Steam_account_second})
 			if [[ ! -z ${check_account} ]]; then
 				echo -e "${Info} ${GreenBG} 成功添加账号配置文件 ${check_account} ${Font}"
+				ls -1 | grep -Po '.*\.json' | grep -v minimal | grep -v example | grep -v ASF | awk -F '.' 'BEGIN{print "\n\n""STEAM ACCOUNT\n------------------\n" }{print NR,"\t",$1}END{print "------------------""\n\n"}'
 				sleep 3
 				exit 0
 			else
@@ -281,6 +281,7 @@ User_Manage_Panel_Add_Steam_Account() {
 			fi
 		else
 			echo -e "${Error} ${RedBG} 请检查现有账号与新建的账号是否重复${Font}"
+			ls -1 | grep -Po '.*\.json' | grep -v minimal | grep -v example | grep -v ASF | awk -F '.' 'BEGIN{print "\n\n""STEAM ACCOUNT\n------------------\n" }{print NR,"\t",$1}END{print "------------------""\n\n"}'
 			sleep 4
 		fi
 	done
