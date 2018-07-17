@@ -8,6 +8,15 @@ export PATH
 
 DIR_PATH="/opt/ArchiSteamFarm"
 ARCHISTEAMFARM_FILES_DIR="/opt/ArchiSteamFarm"
+language=$(cat ${ARCHISTEAMFARM_FILES_DIR}/.env_language)
+
+Judge_Echo_Information() {
+	if [ $language -eq 1 ]; then
+		echo -e "$1"
+	else
+		echo -e "$2"
+	fi
+}
 
 judge() {
 	if [[ $? -eq 0 ]]; then
@@ -27,7 +36,7 @@ judge_asf() {
 	fi
 }
 
-start(){
+start() {
 	judge_asf
 	if [[ $? -eq 0 ]]; then
 		echo "asf 已经存在了！！ 本次操作跳过~~"
@@ -36,7 +45,7 @@ start(){
 	dotnet ${DIR_PATH}/ArchiSteamFarm.dll
 }
 
-screen_start(){
+screen_start() {
 	judge_asf
 	if [[ $? -eq 0 ]]; then
 		echo "asf 已经存在了！！ 本次操作跳过~~"
@@ -92,6 +101,30 @@ log() {
 	fi
 	pm2 log asf
 	judge "查看asf日志"
+}
+
+Choose_ipc_true_or_flase() {
+	Judge_Echo_Information "是否开启IPC？" "Use the IPC ?"
+	echo -e "\\n"
+	Judge_Echo_Information "1.开启 \n2.不开启" "1  Yes. Please trun on it. \n2  No. I don't want to use it."
+	read -r -p "请输入数字 | Please fill in a number." IPC_Config
+	case $IPC_Config in
+	1)
+		IPC_Config="true"
+		Before_Ipc_line_number=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json -n | grep "\"IPC\":" | awk '{print $1}')
+		Now_Icp_string="\"IPC\": ${IPC_Config},"
+		sed -i ''"$(echo "${Before_Ipc_line_number}")"'c '"$(echo "${Now_Icp_string}")"'' ${DIR_PATH}/config/ASF.json
+		judge "Change IPC"
+		;;
+	2) IPC_Config="false"
+		Before_Ipc_line_number=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json -n | grep "\"IPC\":" | awk '{print $1}')
+		Now_Icp_string="\"IPC\": ${IPC_Config},"
+		sed -i ''"$(echo "${Before_Ipc_line_number}")"'c '"$(echo "${Now_Icp_string}")"'' ${DIR_PATH}/config/ASF.json
+		judge "Change IPC"
+		;;
+	*) Choose_ipc_true_or_flase
+		;;
+	esac
 }
 
 Change_IPC_Password() {
@@ -205,11 +238,33 @@ User_Manage_Panel() {
 		echo -e "${Info} ${RedBG} 没有安装ArchiSteamFarm 请先安装 ${Font}"
 	fi
 }
+
+# Get steam account name
+Steam_information_account_Get() {
+	while true; do
+		#clear
+		echo -e "\n"
+		read -r -p "输入你的steam账号名：" Steam_account_first
+		echo -e "\n"
+		read -r -p "再次输入你的steam账号名：" Steam_account_second
+		if [[ -n ${Steam_account_second} ]]; then
+			if [[ ${Steam_account_first} == "${Steam_account_second}" ]]; then
+				break
+			else
+				echo -e "${Error} ${RedBG} 两次输入的账号名称不正确 ! 请重新输入 ${Font}"
+				sleep 2
+			fi
+		else
+			echo -e "${Error} ${RedBG} 请输入你的steam账号 ${Font}"
+			sleep 2
+		fi
+	done
+}
+
 User_Manage_Panel_Add_Steam_Account() {
 	while true; do
 		cd ${ARCHISTEAMFARM_FILES_DIR}/config
 		ls -1 | grep -Po '.*\.json' | grep -v minimal | grep -v example | grep -v ASF | awk -F '.' 'BEGIN{print "\n\n""STEAM ACCOUNT\n------------------\n" }{print NR,"\t",$1}END{print "------------------""\n\n"}'
-		Steam_information_account_Get
 		local check_account=$(cd ${ARCHISTEAMFARM_FILES_DIR}/config && ls | grep ${Steam_account_second})
 		if [[ -z ${check_account} ]]; then
 			Bot_Add
@@ -228,6 +283,22 @@ User_Manage_Panel_Add_Steam_Account() {
 			sleep 4
 		fi
 	done
+}
+
+# 添加一个机器人/BOT 配置文件名为账号名
+Bot_Add() {
+	echo -e "${Info} ${GreenBG} 准备添加BOT ${Font}"
+	touch ${ARCHISTEAMFARM_FILES_DIR}/config/${Steam_account_second}.json
+	cat >${ARCHISTEAMFARM_FILES_DIR}/config/${Steam_account_second}.json <<EOF
+{
+  "PasswordFormat": 1,
+  "SteamLogin": "Steam_account_account_second",
+  "SteamPassword": "",
+  "Enabled": true
+}
+EOF
+	sed -i 's/Steam_account_account_second/'"$(echo "${Steam_account_second}")"'/' "${ARCHISTEAMFARM_FILES_DIR}/config/${Steam_account_second}.json"
+	Judge "ADD BOT"
 }
 
 User_Manage_Panel_Delete_Steam_Account() {
@@ -251,7 +322,10 @@ ${Info} ${RedBG} 后果自负	作者免责${Font}
 			echo -e "${Info} ${GreenBG}输入你想要删除的Steam账号名${Font}" && read account_delete
 			echo -e "${Info} ${GreenBG}再次输入你想要删除的Steam账号名${Font}" && read account_delete_second
 			if [[ ${account_delete} == ${account_delete_second} ]]; then
-				Manage_ArchiSteamFarm_delete_app
+				judge_asf
+				if [[ $? -eq 0 ]]; then
+					pm2 delete asf
+				fi
 				cd ${ARCHISTEAMFARM_FILES_DIR}/config
 				rm ${account_delete_second}.*
 				local check_account=$(cd ${ARCHISTEAMFARM_FILES_DIR}/config && ls | grep ${account_delete_second})
@@ -297,6 +371,9 @@ case "$1" in
 -C)
 	Change_IPC_Port
 	;;
+-ipc)
+	Choose_ipc_true_or_flase
+	;;
 -bg | --background)
 	start_bg
 	;;
@@ -315,6 +392,7 @@ case "$1" in
 		-r		| --remove 		从PM2中移除asf任务
 		-st		| --status 		查看当前asf的状态
 		==========IPC相关快速设置项====================
+		-ipc	|				是否启用IPC
 		-c		|				更改IPC密码
 		-C		|				更改IPC端口号
 		

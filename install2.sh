@@ -58,8 +58,10 @@ Choose_script_language() {
 	read -r -p "请输入数字 | Please fill in a number  :" language
 	case $language in
 	1) language=1
+		echo "1" > ${ARCHISTEAMFARM_FILES_DIR}/.env_language
 		;;
 	2) language=2
+		echo "2" > ${ARCHISTEAMFARM_FILES_DIR}/.env_language
 		;;
 	*) Choose_script_language
 		;;
@@ -281,7 +283,7 @@ Check_system_Install_NetCore() {
 		sudo dpkg -i packages-microsoft-prod.deb
 		sudo apt-get install apt-transport-https
 		sudo apt-get update
-		sudo apt-get install aspnetcore-runtime-2.1
+		sudo apt-get install aspnetcore-runtime-2.1 -y
 		dotnet --info
 		Judge "INSTALL DOTNET"
 	elif [[ "${ID}" == "ubuntu" && $(echo "${VERSION_ID}") == "17.10" ]]; then
