@@ -47,7 +47,7 @@ Is_root() {
 }
 
 Choose_script_language() {
-	touch ${ARCHISTEAMFARM_FILES_DIR}/.env_language
+	touch ${ARCHISTEAMFARM_FILES_DIR}/config/.env_language
 	echo "
     为脚本选择一个语言
     Choose a language for the script.
@@ -59,10 +59,10 @@ Choose_script_language() {
 	read -r -p "请输入数字 | Please fill in a number  :" language
 	case $language in
 	1) language=1
-		echo "1" > ${ARCHISTEAMFARM_FILES_DIR}/.env_language
+		echo "1" > ${ARCHISTEAMFARM_FILES_DIR}/config/.env_language
 		;;
 	2) language=2
-		echo "2" > ${ARCHISTEAMFARM_FILES_DIR}/.env_language
+		echo "2" > ${ARCHISTEAMFARM_FILES_DIR}/config/.env_language
 		;;
 	*) Choose_script_language
 		;;
