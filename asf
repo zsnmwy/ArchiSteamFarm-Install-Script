@@ -8,7 +8,7 @@ export PATH
 
 DIR_PATH="/opt/ArchiSteamFarm"
 ARCHISTEAMFARM_FILES_DIR="/opt/ArchiSteamFarm"
-language=$(cat ${ARCHISTEAMFARM_FILES_DIR}/config/.env_language)
+language=$(cat /opt/.env_language)
 
 Judge_Echo_Information() {
 	if [ $language -eq 1 ]; then
