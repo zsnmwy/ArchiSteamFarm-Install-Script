@@ -47,6 +47,7 @@ Is_root() {
 }
 
 Choose_script_language() {
+	touch ${ARCHISTEAMFARM_FILES_DIR}/.env_language
 	echo "
     为脚本选择一个语言
     Choose a language for the script.
