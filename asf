@@ -36,6 +36,15 @@ start(){
 	dotnet ${DIR_PATH}/ArchiSteamFarm.dll
 }
 
+screen_start(){
+	judge_asf
+	if [[ $? -eq 0 ]]; then
+		echo "asf 已经存在了！！ 本次操作跳过~~"
+		exit 1
+	fi
+	screen dotnet /opt/ArchiSteamFarm/ArchiSteamFarm.dll
+}
+
 start_bg() {
 	judge_asf
 	if [[ $? -eq 0 ]]; then
@@ -58,7 +67,7 @@ status() {
 	fi
 	judge_asf
 	if [[ $? -eq 1 ]]; then
-		echo "asf 还没有启动哟"
+		echo "[此处不检测 screen任务]asf 还没有启动哟"
 		exit 1
 	fi
 	pm2 ls
@@ -164,9 +173,114 @@ port_exist_check() {
 	fi
 }
 
+User_Manage_Panel() {
+	if [[ -e ${ARCHISTEAMFARM_FILES_DIR} ]]; then
+		cd ${ARCHISTEAMFARM_FILES_DIR}/config
+		ls -1 | grep -Po '.*\.json' | grep -v minimal | grep -v example | grep -v ASF | awk -F '.' 'BEGIN{print "\n\n""STEAM ACCOUNT""\n""------------------""\n" }{print NR,"\t",$1}END{print "------------------""\n\n"}'
+		echo -e "
+因为已经采用了AES加密，这里没有密码修改功能
+密码错了，重启ASF再输就行了
+这里也没有账号配置的修改，直接开IPC功能，网页改更快啦~~~
+
+1.增加Steam账号
+2.删除Steam账号
+3.退出
+"
+		echo -e "${Info} ${RedBG} 请问你想？(输入数字) ${Font}" && read aNumber
+		case $aNumber in
+		1)
+			User_Manage_Panel_Add_Steam_Account
+			;;
+		2)
+			User_Manage_Panel_Delete_Steam_Account
+			;;
+		3)
+			exit 0
+			;;
+		*)
+			User_Manage_Panel
+			;;
+		esac
+	else
+		echo -e "${Info} ${RedBG} 没有安装ArchiSteamFarm 请先安装 ${Font}"
+	fi
+}
+User_Manage_Panel_Add_Steam_Account() {
+	while true; do
+		cd ${ARCHISTEAMFARM_FILES_DIR}/config
+		ls -1 | grep -Po '.*\.json' | grep -v minimal | grep -v example | grep -v ASF | awk -F '.' 'BEGIN{print "\n\n""STEAM ACCOUNT\n------------------\n" }{print NR,"\t",$1}END{print "------------------""\n\n"}'
+		Steam_information_account_Get
+		local check_account=$(cd ${ARCHISTEAMFARM_FILES_DIR}/config && ls | grep ${Steam_account_second})
+		if [[ -z ${check_account} ]]; then
+			Bot_Add
+			local check_account=$(cd ${ARCHISTEAMFARM_FILES_DIR}/config && ls | grep ${Steam_account_second})
+			if [[ ! -z ${check_account} ]]; then
+				echo -e "${Info} ${GreenBG} 成功添加账号配置文件 ${check_account} ${Font}"
+				sleep 3
+				exit 0
+			else
+				echo -e "${Error} ${RedBG} 添加失败 请检查${ARCHISTEAMFARM_FILES_DIR}/config文件夹 ${Font}"
+				sleep 3
+				exit 1
+			fi
+		else
+			echo -e "${Error} ${RedBG} 请检查现有账号与新建的账号是否重复${Font}"
+			sleep 4
+		fi
+	done
+}
+
+User_Manage_Panel_Delete_Steam_Account() {
+	cd ${ARCHISTEAMFARM_FILES_DIR}/config
+	ls -1 | grep -Po '.*\.json' | grep -v minimal | grep -v example | grep -v ASF | awk -F '.' 'BEGIN{print "\n\n""STEAM ACCOUNT\n------------------" }{print NR,"\t",$1}END{print "------------------""\n\n"}'
+	echo -e "
+${Info} ${RedBG} 你现在正进行着高风险操作---删除Steam账号数据${Font}
+${Info} ${RedBG} 你现在正进行着高风险操作---删除Steam账号数据${Font}
+${Info} ${RedBG} 你现在正进行着高风险操作---删除Steam账号数据${Font}
+
+${Info} ${RedBG} 此操作会把相关账号的数据从ASF的config目录全部删除！！！！${Font}
+${Info} ${RedBG} 后果自负	作者免责${Font}
+"
+	echo -e "${Info} ${GreenBG}是否继续删除Steam账号数据？${Font}"
+	stty erase '^H' && read -p "(默认: N):" account_delete_yn
+	[[ -z "${account_delete_yn}" ]] && account_delete_yn="n"
+	if [[ "${account_delete_yn}" == [Yy] ]]; then
+		while true; do
+			cd ${ARCHISTEAMFARM_FILES_DIR}/config
+			ls -1 | grep -Po '.*\.json' | grep -v minimal | grep -v example | grep -v ASF | awk -F '.' 'BEGIN{print "\n\n""STEAM ACCOUNT\n------------------" }{print NR,"\t",$1}END{print "------------------""\n\n"}'
+			echo -e "${Info} ${GreenBG}输入你想要删除的Steam账号名${Font}" && read account_delete
+			echo -e "${Info} ${GreenBG}再次输入你想要删除的Steam账号名${Font}" && read account_delete_second
+			if [[ ${account_delete} == ${account_delete_second} ]]; then
+				Manage_ArchiSteamFarm_delete_app
+				cd ${ARCHISTEAMFARM_FILES_DIR}/config
+				rm ${account_delete_second}.*
+				local check_account=$(cd ${ARCHISTEAMFARM_FILES_DIR}/config && ls | grep ${account_delete_second})
+				if [[ -z ${check_account} ]]; then
+					echo -e "${OK} ${GreenBG} 删除账号${account_delete_second} 成功${Font}"
+					sleep 4
+					exit 0
+				else
+					echo -e "${Error} ${RedBG} 删除账号${account_delete_second} 失败${Font}"
+					sleep 4
+					exit 1
+				fi
+			else
+				echo -e "${Error} ${RedBG} 两次输入Steam账号名不同 请再次尝试输入${Font}"
+				sleep 2
+			fi
+		done
+	else
+		echo -e "${Info} ${GreenBG}跳过 不删除账号${Font}"
+	fi
+
+}
+
 case "$1" in
 -s | --start)
 	start
+	;;
+-scr | --screen)
+	screen_start
 	;;
 -l | --log)
 	log
@@ -183,9 +297,27 @@ case "$1" in
 -C)
 	Change_IPC_Port
 	;;
--bg)
+-bg | --background)
 	start_bg
 	;;
-*) echo "使用方法 asf {start | log | remove | status | -c | -C }"
+-acc | --account)
+	User_Manage_Panel
+	;;
+*) echo "
+使用方法
+	asf
+		==========asf启动方式=========================
+		-s 		| --start		正常启动，不后台
+		-scr 	| --screen		在screen内启动asf，不会检测任务是否存在
+		==========PM2管理asf快捷选项===================
+		-bg		| --background 	把asf丢到PM2里面后台，可自动重启(推荐)
+		-l		| --log   		列出日志
+		-r		| --remove 		从PM2中移除asf任务
+		-st		| --status 		查看当前asf的状态
+		==========IPC相关快速设置项====================
+		-c		|				更改IPC密码
+		-C		|				更改IPC端口号
+		
+		"
 	;;
 esac
