@@ -71,11 +71,8 @@ English version will coming soon.
 Now Wiki(zh-CN) is available.
 
 
-![现在Wiki的V1.5版本的中文版已经编写完成](https://github.com/zsnmwy/ArchiSteamFarm-Install-Script/wiki)  
+~~![现在Wiki的V1.5版本的中文版已经编写完成](https://github.com/zsnmwy/ArchiSteamFarm-Install-Script/wiki)~~
 
-更适合萌新的教程发布在Steamcn 
+[WIKI V2.0](https://github.com/zsnmwy/ArchiSteamFarm-Install-Script/wiki/v2.0-%E6%8C%87%E5%8D%97)
 
-V1 https://steamcn.com/t378586-1-1   
-V1.5 https://steamcn.com/t381906-1-1
-
-Bilibili ASF挂卡教程，合卡追梦 https://www.bilibili.com/video/av21978627
+~~Bilibili ASF挂卡教程，合卡追梦 https://www.bilibili.com/video/av21978627~~
