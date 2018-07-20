@@ -539,5 +539,23 @@ case $1 in
 	Install_nvm_node_V8.11.1_PM2
 	ADD_asf_to_bin
 	dotnet /opt/ArchiSteamFarm/ArchiSteamFarm.dll
+	echo "
+使用方法
+	asf
+		==========asf启动方式=========================
+		-s      | --start       正常启动，不后台
+		-scr    | --screen      在screen内启动asf，不会检测任务是否存在
+		==========PM2管理asf快捷选项===================
+		-bg     | --background  把asf丢到PM2里面后台，可自动重启asf(推荐)
+		-l      | --log         列出日志
+		-r      | --remove      从PM2中移除asf任务
+		-st     | --status      查看当前asf的状态
+		==========IPC相关快速设置项====================
+		-ipc    |               是否启用IPC
+		-c      |               更改IPC密码
+		-C      |               更改IPC端口号
+		==========steam 账号管理====================
+		-acc    | --account     steam 账号管理
+	"
 	;;
 esac
