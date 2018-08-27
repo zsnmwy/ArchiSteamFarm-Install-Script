@@ -4,6 +4,8 @@ stages:
 debian8:
   image: debian:8
   script:
+    - echo $UID
+    - whoami
     - date
     - bash install.sh -t
   tags:
@@ -13,6 +15,8 @@ debian8:
 debian9:
   image: debian:9
   script:
+    - echo $UID
+    - whoami
     - date
     - bash install.sh -t
 
@@ -23,6 +27,8 @@ debian9:
 ubuntu14:
   image: ubuntu:14.04
   script:
+    - echo $UID
+    - whoami
     - date
     - bash install.sh -t
 
@@ -33,6 +39,8 @@ ubuntu14:
 ubuntu16:
   image: ubuntu:16.04
   script:
+    - echo $UID
+    - whoami
     - date
     - bash install.sh -t
 
@@ -43,6 +51,8 @@ ubuntu16:
 ubuntu18:
   image: ubuntu:18.04
   script:
+    - echo $UID
+    - whoami
     - date
     - bash install.sh -t
 
@@ -53,6 +63,8 @@ ubuntu18:
 centos7:
   image: centos:7
   script:
+    - echo $UID
+    - whoami
     - date
     - bash install.sh -t
 
