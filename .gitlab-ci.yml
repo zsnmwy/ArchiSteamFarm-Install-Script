@@ -1,0 +1,60 @@
+stages:
+  - test
+
+debian8:
+  image: debian:8
+  script:
+    - date
+    - bash install.sh -t
+  tags:
+    - test
+
+
+debian9:
+  image: debian:9
+  script:
+    - date
+    - bash install.sh -t
+
+  tags:
+    - test
+
+
+ubuntu14:
+  image: ubuntu:14.04
+  script:
+    - date
+    - bash install.sh -t
+
+  tags:
+    - test
+
+
+ubuntu16:
+  image: ubuntu:16.04
+  script:
+    - date
+    - bash install.sh -t
+
+  tags:
+    - test
+
+
+ubuntu18:
+  image: ubuntu:18.04
+  script:
+    - date
+    - bash install.sh -t
+
+  tags:
+    - test
+
+
+centos7:
+  image: centos:7
+  script:
+    - date
+    - bash install.sh -t
+
+  tags:
+      - test

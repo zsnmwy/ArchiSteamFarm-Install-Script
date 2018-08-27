@@ -512,6 +512,54 @@ ADD_asf_to_bin() {
 case $1 in
 -d) Remove_all_file
   ;;
+-t)
+  language=1
+  echo "1" >/opt/.env_language
+
+
+  Check_system_bit
+  Check_install_ArchiSteamFarm
+  Is_root
+
+
+  #Choose_ipc_true_or_flase
+  IPC_Config="true"
+  IPC_password="123456"
+  IPC_password=$(echo \"${IPC_password}\")
+
+
+  #Steam_information_SteamOwnerID_Get
+  Steam_account_SteamOwnerID_first="123456"
+  Steam_account_SteamOwnerID_second="123456"
+
+  #Steam_information_account_Get
+  Steam_account_SteamOwnerID_first="456789"
+  Steam_account_SteamOwnerID_second="456789"
+
+  #Choose_language
+  LANGUAGE='"zh-CN"'
+
+
+  if ! dotnet --info 1>/dev/null; then
+    echo -e "${Info} ${RedBG}  Can't find the dotnet. Now install... ${Font}"
+    Check_system_Install_NetCore
+  else
+    echo -e "${OK} ${GreenBG} dotnet --- ok ${Font}"
+  fi
+
+
+  ArchiSteamFarm_Install
+  ArchiSteamFarm_json_language_ipc_password_choose_change
+  Bot_Add
+  Install_nvm_node_V8.11.1_PM2
+  #ADD_asf_to_bin
+
+
+  cat ${ARCHISTEAMFARM_FILES_DIR}/config/${Steam_account_second}.json
+  cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json
+  
+  dotnet --info
+  ;;
 *)
   Choose_script_language
   Check_system_bit
