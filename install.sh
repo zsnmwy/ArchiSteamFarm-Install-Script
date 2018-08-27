@@ -235,7 +235,7 @@ Check_system_Install_NetCore() {
     echo -e "${OK} ${GreenBG} 当前系统为 Centos ${VERSION_ID} ${VERSION} ${Font} "
     rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
     yum update -y 1>/dev/null
-    yum install -y unzip curl libunwind libicu wget unzip screen lttng-ust libcurl openssl-libs libuuid krb5-libs zlib lsof aspnetcore-runtime-2.1
+    yum install -y unzip curl libunwind libicu wget unzip screen lttng-ust libcurl openssl-libs libuuid krb5-libs zlib lsof aspnetcore-runtime-2.1 psmisc
     dotnet --info
     Judge "INSTALL DOTNET"
   elif [[ "${ID}" == "debian" && ${VERSION_ID} == "8" ]]; then
@@ -243,7 +243,7 @@ Check_system_Install_NetCore() {
     echo "这里是Debian8的配置"
     echo -e "${OK} ${GreenBG} 当前系统为 Debian ${VERSION_ID} ${Font} "
     apt-get update 1>/dev/null
-    apt-get install -y curl libunwind8 gettext apt-transport-https wget unzip screen liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g lsof
+    apt-get install -y curl libunwind8 gettext apt-transport-https wget unzip screen liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g lsof psmisc
     wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.asc.gpg
     mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
     wget -q https://packages.microsoft.com/config/debian/8/prod.list
@@ -259,7 +259,7 @@ Check_system_Install_NetCore() {
     echo "这里是Debian9的配置"
     echo -e "${OK} ${GreenBG} 当前系统为 Debian ${VERSION_ID} ${Font} "
     apt-get update 1>/dev/null
-    apt-get install -y curl libunwind8 gettext apt-transport-https wget unzip screen liblttng-ust0 libcurl3 libssl1.0.2 libuuid1 libkrb5-3 zlib1g lsof
+    apt-get install -y curl libunwind8 gettext apt-transport-https wget unzip screen liblttng-ust0 libcurl3 libssl1.0.2 libuuid1 libkrb5-3 zlib1g lsof psmisc
     wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.asc.gpg
     mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
     wget -q https://packages.microsoft.com/config/debian/9/prod.list
@@ -275,7 +275,7 @@ Check_system_Install_NetCore() {
     echo "这里是Ubuntu 18.04的配置"
     echo -e "${OK} ${GreenBG} 当前系统为 Ubuntu ${VERSION_ID} ${VERSION} ${Font} "
     apt-get update 1>/dev/null
-    apt-get install curl wget unzip screen apt-transport-https lsof -y
+    apt-get install curl wget unzip screen apt-transport-https lsof psmisc -y
     wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
     dpkg -i packages-microsoft-prod.deb
     apt-get install apt-transport-https
@@ -288,7 +288,7 @@ Check_system_Install_NetCore() {
     echo "这里是Ubuntu 17.10的配置"
     echo -e "${OK} ${GreenBG} 当前系统为 Ubuntu ${VERSION_ID} ${VERSION} ${Font} "
     apt-get update 1>/dev/null
-    apt-get install curl wget unzip screen apt-transport-https lsof -y
+    apt-get install curl wget unzip screen apt-transport-https lsof psmisc -y
     wget -q https://packages.microsoft.com/config/ubuntu/17.10/packages-microsoft-prod.deb
     dpkg -i packages-microsoft-prod.deb
     apt-get update
@@ -300,7 +300,7 @@ Check_system_Install_NetCore() {
     echo "这里是Ubuntu 16的配置"
     echo -e "${OK} ${GreenBG} 当前系统为 Ubuntu ${VERSION_ID} ${VERSION} ${Font} "
     apt-get update 1>/dev/null
-    apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu55 lsof -y
+    apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu55 lsof psmisc -y
     wget -q https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb
     dpkg -i packages-microsoft-prod.deb
     apt-get update
@@ -312,7 +312,7 @@ Check_system_Install_NetCore() {
     echo "这里是Ubuntu 14的配置"
     echo -e "${OK} ${GreenBG} 当前系统为 Ubuntu ${VERSION_ID} ${VERSION} ${Font} "
     apt-get update 1>/dev/null
-    apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu52 lsof -y
+    apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu52 lsof psmisc -y
     wget -q https://packages.microsoft.com/config/ubuntu/14.04/packages-microsoft-prod.deb
     dpkg -i packages-microsoft-prod.deb
     apt-get update
@@ -559,6 +559,9 @@ case $1 in
   cat ${ARCHISTEAMFARM_FILES_DIR}/config/ASF.json
 
   dotnet --info
+  (dotnet /opt/ArchiSteamFarm/ArchiSteamFarm.dll)&
+  sleep 10
+  killall dotnet
   ;;
 *)
   Choose_script_language
