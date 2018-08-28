@@ -35,6 +35,8 @@ source /etc/os-release
 VERSION=$(echo ${VERSION} | awk -F "[()]" '{print $2}')
 BIT=$(uname -m)
 
+ASF_VERSION="3.3.0.3"
+
 Is_root() {
   if [ "$(id -u)" == 0 ]; then
     echo -e "${OK} ${GreenBG} 当前用户是root用户，进入安装流程 ${Font} "
@@ -342,7 +344,7 @@ Raspberry_Pi_Install_ArchiSteamFarm() {
   if [[ ! -e ${ARCHISTEAMFARM_FILES_DIR} ]]; then
     while true; do
       echo -e "${Info} ${GreenBG} Start downloading ASF. ${Font}"
-      wget -q --no-check-certificate -O "ArchiSteamFarm.zip" "https://github.com/JustArchi/ArchiSteamFarm/releases/download/3.2.0.5/ASF-linux-arm.zip" 1>/dev/null
+      wget -q --no-check-certificate -O "ArchiSteamFarm.zip" "https://github.com/JustArchi/ArchiSteamFarm/releases/download/${ASF_VERSION}/ASF-linux-arm.zip" 1>/dev/null
       if [[ -e ArchiSteamFarm.zip ]]; then
         echo -e "${OK} ${GreenBG} 下载完成 ${Font}"
         echo -e "${Info} ${RedBG} Extract  ArchiSteamFarm.zip ${Font}"
@@ -404,7 +406,7 @@ ArchiSteamFarm_Install() {
   while true; do
     echo -e "${Info} ${GreenBG} 获取 ArchiSteamFarm 最新稳定版 ${Font}"
     #wget --no-check-certificate -O ArchiSteamFarm.zip $(curl -s 'https://api.github.com/repos/JustArchi/ArchiSteamFarm/releases/latest' | grep -Po '"browser_download_url": "\K.*?(?=")' | grep generic)
-    wget -q --no-check-certificate -O "ArchiSteamFarm.zip" "https://github.com/JustArchi/ArchiSteamFarm/releases/download/3.2.0.5/ASF-generic.zip"
+    wget -q --no-check-certificate -O "ArchiSteamFarm.zip" "https://github.com/JustArchi/ArchiSteamFarm/releases/download/${ASF_VERSION}/ASF-generic.zip"
     Judge "Download ArchiSteamFarm.zip"
     if [[ -e ArchiSteamFarm.zip ]]; then
       echo -e "${OK} ${GreenBG} 下载完成 ${Font}"
