@@ -299,8 +299,8 @@ Check_system_Install_NetCore() {
     ## Ubuntu 16
     echo "这里是Ubuntu 16的配置"
     echo -e "${OK} ${GreenBG} 当前系统为 Ubuntu ${VERSION_ID} ${VERSION} ${Font} "
-    apt-get update 1>/dev/null
-    apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu55 lsof psmisc -y
+    DEBIAN_FRONTEND=noninteractive apt-get update 1>/dev/null
+    DEBIAN_FRONTEND=noninteractive apt-get install curl wget unzip screen apt-transport-https libunwind8 liblttng-ust0 libcurl3 libssl1.0.0 libuuid1 libkrb5-3 zlib1g libicu55 lsof psmisc -y
     wget -q https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb
     dpkg -i packages-microsoft-prod.deb
     apt-get update
