@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+function auto_complete() {
+  local options_array=("start" "screen" "log" "remove" "status" "change_ipc_password" "change_ipc_port" "ipc" "background" "account")
+
+  local cur prev
+
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD - 1]}"
+
+  case $prev in
+  'asf')
+    COMPREPLY=("$(compgen -W "${options_array[*]}" -- $cur)")
+    ;;
+  '*')
+    COMPREPLY=("$(compgen -d -f ${cur})")
+    ;;
+  esac
+
+  return 0
+
+}
+
+complete -F auto_complete asf

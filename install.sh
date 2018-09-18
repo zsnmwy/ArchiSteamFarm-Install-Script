@@ -511,6 +511,15 @@ ADD_asf_to_bin() {
   chmod 777 '/bin/asf'
 }
 
+ADD_asf_auto_compelete_to_bash_path(){
+  if [[ -f '/etc/bash_completion.d/asf_auto_complete' ]]; then
+    rm -rf '/etc/bash_completion.d/asf_auto_complete'
+  fi
+  wget 'https://raw.githubusercontent.com/zsnmwy/ArchiSteamFarm-Install-Script/master/asf_auto_complete' -P '/etc/bash_completion.d/'
+  Judge "Download asf_auto_complete to /etc/bash_completion.d/"
+  source '/etc/bash_completion.d/asf_auto_complete'
+}
+
 case $1 in
 -d) Remove_all_file
   ;;
@@ -589,6 +598,8 @@ case $1 in
   echo "
 使用方法
 	asf
+    ==========支持自动补全=========================
+
 		==========asf启动方式=========================
 		-s      | --start       正常启动，不后台
 		-scr    | --screen      在screen内启动asf，不会检测任务是否存在

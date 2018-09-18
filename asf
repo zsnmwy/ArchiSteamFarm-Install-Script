@@ -60,7 +60,8 @@ start_bg() {
 		echo "asf 已经存在了！！ 本次操作跳过~~"
 		exit 1
 	fi
-	pm2 start "dotnet ${DIR_PATH}/ArchiSteamFarm.dll" -n asf
+	cd "${DIR_PATH}"
+	pm2 start "dotnet ArchiSteamFarm.dll" -n asf
 	judge "启动方式: dotnet ${DIR_PATH}/ArchiSteamFarm.dll"
 	pm2 log asf
 }
@@ -352,34 +353,34 @@ ${Info} ${RedBG} 后果自负	作者免责${Font}
 }
 
 case "$1" in
--s | --start)
+-s | --start | start)
 	start
 	;;
--scr | --screen)
+-scr | --screen | screen)
 	screen_start
 	;;
--l | --log)
+-l | --log | log)
 	log
 	;;
--r | --remove)
+-r | --remove | remove)
 	remove
 	;;
--st | --status)
+-st | --status | status)
 	status
 	;;
--c)
+-c | change_ipc_password)
 	Change_IPC_Password
 	;;
--C)
+-C | change_ipc_port)
 	Change_IPC_Port
 	;;
--ipc)
+-ipc | ipc)
 	Choose_ipc_true_or_flase
 	;;
--bg | --background)
+-bg | --background | background)
 	start_bg
 	;;
--acc | --account)
+-acc | --account | account)
 	User_Manage_Panel
 	;;
 *) echo "
