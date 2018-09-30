@@ -517,7 +517,9 @@ ADD_asf_auto_compelete_to_bash_path(){
   fi
   wget 'https://raw.githubusercontent.com/zsnmwy/ArchiSteamFarm-Install-Script/master/asf_auto_complete' -P '/etc/bash_completion.d/'
   Judge "Download asf_auto_complete to /etc/bash_completion.d/"
-  source '/etc/bash_completion.d/asf_auto_complete'
+  echo "source /etc/bash_completion.d/asf_auto_complete" >> /etc/bash.bashrc
+  echo "source /etc/bash_completion.d/asf_auto_complete" >> /etc/bashrc
+  source "/etc/bash_completion.d/asf_auto_complete"
 }
 
 case $1 in
