@@ -1,0 +1,6 @@
+https://steamcommunity.com:443, www.steamcommunity.com:443 {
+    tls openssl/CA/Unblock/unblock.crt openssl/CA/Unblock/unblock.key
+    reverse_proxy https://steamuserimages-a.akamaihd.net https://steamstore-a.akamaihd.net https://steamcommunity-a.akamaihd.net https://steampipe.akamaized.net https://eaassets-a.akamaihd.net https://humblebundle-a.akamaihd.net https://steamcommunity-a.akamaihd.net  {
+        header_up Host steamcommunity.com
+    }
+}
